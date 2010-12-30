@@ -44,9 +44,7 @@
 
 - (void)flipImage:(UIViewAnimationOptions)direction;
 - (void)updateSlides:(NSTimer *)timer;
-
-- (void)writeToConfig:(NSString *)value forKey:(NSString *)key;
-- (NSMutableDictionary *)readConfiguration;
+	
 
 @end
 

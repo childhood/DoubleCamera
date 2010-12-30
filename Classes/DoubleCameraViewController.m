@@ -51,17 +51,7 @@
 	
 	[loadingView startAnimating];
 	loadingView.hidden = NO;
-	
-	// Load default images
-	NSArray *directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0] error:nil];
-	NSLog(@"%@", directoryContents);
-	NSString *frontImagePath = [NSString pathWithComponents: [NSArray arrayWithObjects: NSHomeDirectory() ,  @"Documents", @"01_front.jpg", nil]];
-	NSString *backImagePath = [NSString pathWithComponents: [NSArray arrayWithObjects: NSHomeDirectory() ,  @"Documents", @"01_back.jpg", nil]];	
-	//self.frontImageView.image = [UIImage imageWithContentsOfFile:frontImagePath];
-	//self.backImageView.image = [UIImage imageWithContentsOfFile:backImagePath];
-	
-	//self.slideTimer = [NSTimer scheduledTimerWithTimeInterval: 2 target:self selector:@selector(updateSlides:) userInfo:nil repeats:YES];
-	
+
 	// Initialize children view controllers
 	self.reviewController = [[[ReviewPhotoViewController alloc] initWithNibName:@"ReviewView" bundle:nil] autorelease];
 	self.organizerController = [[[OrganizerViewController alloc] initWithNibName:@"OrganizerView" bundle:nil] autorelease];

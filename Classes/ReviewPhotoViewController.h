@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 #import "CameraOverlayController.h"
-
+#import "DoublePhoto.h"
 
 @interface ReviewPhotoViewController : UIViewController <CameraOverlayDelegate, UIGestureRecognizerDelegate> {
 	UIImageView *frontImageView;
@@ -20,11 +20,15 @@
 	NSUserDefaults *userDefaults;
 	
 	CameraOverlayController *cameraController;
+	
+	DoublePhoto *capturedDoublePhoto;
 }
 @property (nonatomic,retain) CameraOverlayController *cameraController;
 
 @property (nonatomic, retain) NSMutableArray *capturedImages;
 @property (nonatomic, retain) NSUserDefaults *userDefaults;
+
+@property (nonatomic, retain) DoublePhoto *capturedDoublePhoto;
 
 @property (nonatomic, retain) IBOutlet UIImageView *frontImageView;
 @property (nonatomic, retain) IBOutlet UIImageView *backImageView;

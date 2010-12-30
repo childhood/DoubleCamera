@@ -26,8 +26,8 @@ typedef enum {
 	UIToolbar *mainToolbar;
 	UIToolbar *multipleSelectionToolbar;
 	
-	NSMutableDictionary *frontThumbs;
-	NSMutableDictionary *backThumbs;
+	NSMutableDictionary *doublePhotos;
+
 	
 	NSMutableArray *selectedImages;
 	
@@ -40,8 +40,12 @@ typedef enum {
 @property (nonatomic, retain) IBOutlet UIScrollView *backScrollView;
 @property (nonatomic, retain) IBOutlet UIToolbar *mainToolbar;
 
+@property (nonatomic, retain) UIImage *checkImage;
+
 @property (nonatomic, retain) NSString *baseImageDirectory;
 @property (nonatomic, retain) NSMutableArray *selectedImages;
+
+@property (nonatomic, retain) NSMutableDictionary *doublePhotos;
 
 - (void)flipGesture:(UISwipeGestureRecognizer *)recognizer;
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch;

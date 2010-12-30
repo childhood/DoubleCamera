@@ -7,11 +7,11 @@
 //
 
 #import "ReviewPhotoViewController.h"
-
+#import "DoublePhoto.h"
 
 @implementation ReviewPhotoViewController
 
-@synthesize capturedImages, userDefaults;
+@synthesize capturedImages, userDefaults, capturedDoublePhoto;
 @synthesize frontImageView, backImageView, mainToolbar;
 @synthesize cameraController;
 
@@ -27,31 +27,33 @@
 		
 		self.cameraController = [[[CameraOverlayController alloc] initWithNibName:@"CameraOverlayView" bundle:nil] autorelease];
 		self.cameraController.delegate = self;		
+		self.modalTransitionStyle = UIModalTransitionStyleCrossDissolve;
+		
+		
+		[self.navigationController setNavigationBarHidden:YES];
+		self.capturedImages = [NSMutableArray array];
+		
+		// Set up gestures
+		UISwipeGestureRecognizer *switchPhotoGestureRight = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(flipGesture:)] autorelease];
+		switchPhotoGestureRight.delegate = self;
+		[self.view addGestureRecognizer:switchPhotoGestureRight];
+		UISwipeGestureRecognizer *switchPhotoGestureLeft = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(flipGesture:)] autorelease];
+		switchPhotoGestureLeft.direction = UISwipeGestureRecognizerDirectionLeft;
+		switchPhotoGestureLeft.delegate = self;
+		[self.view addGestureRecognizer:switchPhotoGestureLeft];
+		
+		UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleToolbars)] autorelease];
+		tapGestureRecognizer.delegate = self;
+		[self.view addGestureRecognizer:tapGestureRecognizer];			
     }
     return self;
 }
 
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
-- (void)viewDidLoad {
-    [super viewDidLoad];	
-	
-	[self.navigationController setNavigationBarHidden:YES];
-	self.capturedImages = [NSMutableArray array];
-	
-	// Set up gestures
-	UISwipeGestureRecognizer *switchPhotoGestureRight = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(flipGesture:)] autorelease];
-	switchPhotoGestureRight.delegate = self;
-	[self.view addGestureRecognizer:switchPhotoGestureRight];
-	UISwipeGestureRecognizer *switchPhotoGestureLeft = [[[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(flipGesture:)] autorelease];
-	switchPhotoGestureLeft.direction = UISwipeGestureRecognizerDirectionLeft;
-	switchPhotoGestureLeft.delegate = self;
-	[self.view addGestureRecognizer:switchPhotoGestureLeft];
-	
-	UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleToolbars)] autorelease];
-	tapGestureRecognizer.delegate = self;
-	[self.view addGestureRecognizer:tapGestureRecognizer];	
-}
+//- (void)viewDidLoad {
+//    [super viewDidLoad];	
+//}
 
 
 /*
@@ -77,6 +79,9 @@
 
 
 - (void)dealloc {
+	[self.userDefaults release];
+	[self.cameraController release];
+	[self.capturedImages release];
     [super dealloc];
 }
 
@@ -132,22 +137,21 @@
 
 - (IBAction)save {
 	NSInteger fileInteger = [userDefaults integerForKey:@"file_number"];
-	NSString *fileNumber = [NSString stringWithFormat:@"%.4i", fileInteger];
-	NSString *frontFilename = [fileNumber stringByAppendingString:@"_front.jpg"];
-	NSString *backFilename = [fileNumber stringByAppendingString:@"_back.jpg"];
-	NSData *frontImageData = [NSData dataWithData:UIImageJPEGRepresentation([self.capturedImages objectAtIndex:0], 0.9)];
-	NSString *frontImagePath = [NSString pathWithComponents: [NSArray arrayWithObjects: NSHomeDirectory(),  @"Documents", frontFilename, nil]];
-	NSData *backImageData = [NSData dataWithData:UIImageJPEGRepresentation([self.capturedImages objectAtIndex:1], 0.9)];
-	NSString *backImagePath = [NSString pathWithComponents: [NSArray arrayWithObjects: NSHomeDirectory(),  @"Documents", backFilename, nil]];
+	NSString *filePrefix = [NSString stringWithFormat:@"%.4i", fileInteger];
 	
-	[frontImageData writeToFile:frontImagePath atomically:YES];
-	[backImageData writeToFile:backImagePath atomically:YES];
+	self.capturedDoublePhoto.filePrefix = filePrefix;
+	self.capturedDoublePhoto.filePath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 	
-	[userDefaults setInteger:(fileInteger+1) forKey:@"file_number"];
+	if([self.capturedDoublePhoto saveToDisk] == 4) {
+		[userDefaults setInteger:(fileInteger+1) forKey:@"file_number"];
+		NSLog(@"Saved!");
+	}
+	else {
+		NSLog(@"Error saving.");
+	}
+	
+	[self.capturedDoublePhoto release];
 
-	[self.capturedImages removeAllObjects];
-	
-	NSLog(@"Saved!");
 	[self.navigationController popViewControllerAnimated:YES];
 }
 
@@ -155,7 +159,9 @@
 	// Just return to the last view
 	//[self.navigationController popViewControllerAnimated:YES];
 	[self launchCamera];
-	[self.capturedImages removeAllObjects];
+
+	
+	[self.capturedDoublePhoto release];
 }
 
 
@@ -167,21 +173,22 @@
 #pragma -
 #pragma mark CameraOverlayDelegate
 
-- (void)didTakePicture:(UIImage *)picture {	
+- (void)didTakePicture:(NSData *)pictureData {	
 	NSLog(@"Adding picture to array of captured images");
-	[self.capturedImages addObject:picture];
-	
-	NSLog(@"Picture %i added: %f x %f", [self.capturedImages count], picture.size.width, picture.size.height);
+	[self.capturedImages addObject:pictureData];
 }
 - (void)didFinishWithCamera {
 	[self dismissModalViewControllerAnimated:YES];
-	
-	if ([self.capturedImages count] > 0) {
-		NSLog(@"Displaying %i captured images...", [self.capturedImages count]);
+	if ([self.capturedImages count] == 2) {		
+		self.capturedDoublePhoto = [[DoublePhoto alloc] initWithFrontData:[self.capturedImages objectAtIndex:0] andBackData:[self.capturedImages objectAtIndex:1]];
+
+		[self.capturedImages removeAllObjects];
 		
-		[self.frontImageView setImage:[self.capturedImages objectAtIndex:0]];
-		if([self.capturedImages count] > 1)
-			[self.backImageView setImage:[self.capturedImages objectAtIndex:1]];
+		[self.frontImageView setImage:self.capturedDoublePhoto.frontScreenImage];
+		[self.backImageView setImage:self.capturedDoublePhoto.backScreenImage];
+		
+		UIImage *image = [UIImage imageWithData:self.capturedDoublePhoto.frontJPEGData];
+		NSLog(@"%f.0 x %f.0", image.size.width, image.size.height);
 	}	
 	else {
 		[self.navigationController popViewControllerAnimated:YES];

@@ -22,12 +22,18 @@
 	AVCaptureSession *cameraCaptureSession;
 	AVCaptureVideoPreviewLayer *cameraPreviewLayer;
 
+	UIActivityIndicatorView *activityIndicator;
+	
+	BOOL readyForNext;
 	
 }
 
 @property (nonatomic, assign) id <CameraOverlayDelegate> delegate;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *takePictureButton;
 @property (nonatomic, retain) IBOutlet UIBarButtonItem *cancelButton;
+
+@property (nonatomic, retain) AVCaptureVideoPreviewLayer *cameraPreviewLayer;
+@property (nonatomic, retain) UIActivityIndicatorView *activityIndicator;
 
 @property (nonatomic, retain) IBOutlet UIView *frontView;
 @property (nonatomic, retain) IBOutlet UIView *backView;
@@ -39,14 +45,16 @@
 - (IBAction)cancel:(id)sender;
 - (IBAction)takePhoto:(id)sender;
 - (IBAction)switchView:(id)sender;
-
+- (void)readyForNext:(NSTimer *)theTimer;
 - (void)takeAnotherPhoto;
 
-UIImage *imageFromSampleBuffer(CMSampleBufferRef sampleBuffer);
+- (NSData *)imageDataFromSampleBuffer:(CMSampleBufferRef)sampleBuffer orientation:(UIDeviceOrientation)orientation mirrored:(BOOL)mirrored;
+
+NSData *imageDataFromSampleBuffer(CMSampleBufferRef sampleBuffer);
 
 @end
 
 @protocol CameraOverlayDelegate
-- (void)didTakePicture:(UIImage *)picture;
+- (void)didTakePicture:(NSData *)pictureData;
 - (void)didFinishWithCamera;
 @end

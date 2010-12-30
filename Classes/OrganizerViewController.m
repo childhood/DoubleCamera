@@ -8,10 +8,11 @@
 
 #import "OrganizerViewController.h"
 #import "UIImageExtras.h"
+#import "DoublePhoto.h"
 
 @implementation OrganizerViewController
 
-@synthesize backScrollView, frontScrollView, selectedImages, baseImageDirectory, mainToolbar;
+@synthesize backScrollView, frontScrollView, selectedImages, checkImage, baseImageDirectory, mainToolbar, doublePhotos;
 
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
@@ -20,6 +21,7 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
 		self.baseImageDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+		self.doublePhotos = [NSMutableDictionary dictionary];
     }
     return self;
 }
@@ -40,11 +42,9 @@
 	self.selectedImages = [NSMutableArray array];
 	
 	// Load icons
-	checkImage = [[UIImage imageNamed:@"check.png"] retain];
-	if(checkImage == nil) NSLog(@"Could not load check image file.");
+	self.checkImage = [UIImage imageNamed:@"check.png"];
+	if(self.checkImage == nil) NSLog(@"Could not load check image file.");
 	
-	frontThumbs = [[NSMutableDictionary dictionary] retain];
-	backThumbs = [[NSMutableDictionary dictionary] retain];
 	[self reloadThumbnails];
 	
 	frontScrollView.delegate = self;
@@ -69,66 +69,54 @@
 	}	
 	
 	// Load images from directory and add UIImage thumbnails
-	NSLog(@"Getting directroy contents for %@", baseImageDirectory);
 	NSArray *directoryContents = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:baseImageDirectory error:nil];
-	NSLog(@"Directory contents retrieved.");
 	
 	// Make thumbnails for front and back
-	NSMutableDictionary *newFrontThumbs = [NSMutableDictionary dictionary];
-	NSMutableDictionary *newBackThumbs = [NSMutableDictionary dictionary];
+	NSMutableDictionary *newDoublePhotos = [NSMutableDictionary dictionary];
 	for(NSString *filename in directoryContents) {
-		NSString *key;
-		NSMutableDictionary *oldThumbDictionary;
-		NSMutableDictionary *newThumbDictionary;
 		if([filename hasSuffix:@"_front.jpg"]) {
-			key = [filename substringToIndex:[filename rangeOfString:@"_front.jpg" options:NSBackwardsSearch].location];
-			oldThumbDictionary = frontThumbs;
-			newThumbDictionary = newFrontThumbs;
-		}
-		else if([filename hasSuffix:@"_back.jpg"]) {
-			key = [filename substringToIndex:[filename rangeOfString:@"_back.jpg" options:NSBackwardsSearch].location];
-			oldThumbDictionary = backThumbs;
-			newThumbDictionary = newBackThumbs;
-		}
-		
-		if([oldThumbDictionary objectForKey:key] == nil) {	// Don't create a new UIImage thumbnail if it already exists!
-			NSString *imagePath =  [baseImageDirectory stringByAppendingFormat:@"/%@",filename];
-			UIImage *thumbImage = [[UIImage imageWithContentsOfFile:imagePath] imageByScalingAndCroppingForSize: CGSizeMake(148,148)];
-			[newThumbDictionary setObject:thumbImage forKey:key];
-			NSLog(@"Added new key: %@", key);
-		}
-		else {
-			[newThumbDictionary setObject:[oldThumbDictionary objectForKey:key] forKey:key];
+			NSString *key = [filename substringToIndex:[filename rangeOfString:@"_front.jpg" options:NSBackwardsSearch].location];
+			if([doublePhotos objectForKey:key] == nil) {	// Don't create a new object if one already exists!
+				DoublePhoto *newDoublePhoto = [[DoublePhoto alloc] initThumbnailsWithPath:baseImageDirectory andPrefix:key];
+				[newDoublePhotos setObject:newDoublePhoto forKey:key];
+				[newDoublePhoto release];
+			}
+			else {
+				[newDoublePhotos setObject:[doublePhotos objectForKey:key] forKey:key];
+			}
 		}
 	}
 	
-	[frontThumbs setDictionary:newFrontThumbs];
-	[backThumbs setDictionary:newBackThumbs];
+	[doublePhotos setDictionary:newDoublePhotos];
 	
 	// Make buttons for each image
 	int i=0;
-	for(NSString* key in frontThumbs) {
-		if([backThumbs objectForKey:key] != nil) {		// Make sure there's a matching back
+	for(NSString* key in doublePhotos) {
+		DoublePhoto *doublePhoto = (DoublePhoto *)[doublePhotos objectForKey:key];
+		if(doublePhoto.frontThumbnailImage != nil && doublePhoto.backThumbnailImage != nil) {
 			CGRect buttonFrame = CGRectMake((i%4) * 78 + 6, (int)(i/4)*78 + 6, 74, 74);
 			UIButton *frontButton = [UIButton buttonWithType:UIButtonTypeCustom];
 			frontButton.frame = buttonFrame;
-			[frontButton setImage:(UIImage*)[frontThumbs objectForKey:key] forState:UIControlStateNormal];
+			[frontButton setImage:doublePhoto.frontThumbnailImage forState:UIControlStateNormal];
 			[frontButton setTitle:key forState:UIControlStateNormal];
 			[frontButton addTarget:self action:@selector(imageTouched:) forControlEvents:UIControlEventTouchUpInside];
 			[frontScrollView addSubview:frontButton];
 			
 			UIButton *backButton = [UIButton buttonWithType:UIButtonTypeCustom];
 			backButton.frame = buttonFrame;
-			[backButton setImage:(UIImage*)[backThumbs objectForKey:key] forState:UIControlStateNormal];
+			[backButton setImage:doublePhoto.backThumbnailImage forState:UIControlStateNormal];
 			[backButton setTitle:key forState:UIControlStateNormal];
 			[backButton addTarget:self action:@selector(imageTouched:) forControlEvents:UIControlEventTouchUpInside];
 			[backScrollView addSubview:backButton];
 			i++;
 		}
+		else {
+			NSLog(@"Thumbnail images are nil.");
+		}
 	}
 	
-	[frontScrollView setContentSize:CGSizeMake(320,  (int)(frontThumbs.count/4 + 1) * 78 + 6)];
-	[backScrollView setContentSize:CGSizeMake(320,  (int)(frontThumbs.count/4 + 1) * 78 + 6)];
+	[frontScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/4 + 2) * 78 + 6)];
+	[backScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/4 + 2) * 78 + 6)];
 }
 
 
@@ -411,9 +399,7 @@
 
 - (void)viewDidUnload {
     [super viewDidUnload];
-	[backThumbs release];
-	[frontThumbs release];
-	NSLog(@"Cleared thumbnails.");
+
 	[checkImage release];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
@@ -421,6 +407,7 @@
 
 
 - (void)dealloc {
+	[self.doublePhotos release];
     [super dealloc];
 }
 
