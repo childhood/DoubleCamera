@@ -127,10 +127,24 @@
 	
 	// Make buttons for each image
 	int i=0;
+	int perRow = 4;
+	int bufferTop = 64;
+	int bufferBottom = 44;
+	
+	if(UIInterfaceOrientationIsPortrait(self.interfaceOrientation)) {
+		perRow = 4;
+		bufferTop = 64;
+	}
+	else {
+		perRow = 6;
+		bufferTop = 54;
+	}
+	
 	for(NSString* key in orderedPhotoKeys) {
 		DoublePhoto *doublePhoto = (DoublePhoto *)[doublePhotos objectForKey:key];
 		if(doublePhoto.frontThumbnailImage != nil && doublePhoto.backThumbnailImage != nil) {
-			CGRect buttonFrame = CGRectMake((i%4) * 78 + 6, (int)(i/4)*78 + 4 + 64, 74, 74);
+			CGRect buttonFrame = CGRectMake((i%perRow) * 78 + 6, (int)(i/perRow)*78 + 4 + bufferTop, 74, 74);
+
 			UIButton *frontButton = [UIButton buttonWithType:UIButtonTypeCustom];
 			frontButton.frame = buttonFrame;
 			[frontButton setImage:doublePhoto.frontThumbnailImage forState:UIControlStateNormal];
@@ -152,8 +166,8 @@
 	}
 	
 	// Set the scroll view sizes
-	[frontScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/4 + 2) * 78 + 6 + 44)];
-	[backScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/4 + 2) * 78 + 6 + 44)];
+	[frontScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/perRow + 2) * 78 + 6 + bufferBottom)];
+	[backScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/perRow + 2) * 78 + 6 + bufferBottom)];
 }
 
 
@@ -515,6 +529,10 @@
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
     // Return YES for supported orientations.
     return YES;
+}
+
+- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation duration:(NSTimeInterval)duration{
+	[self reloadThumbnails];
 }
 
 - (void)didReceiveMemoryWarning {

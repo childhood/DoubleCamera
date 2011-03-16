@@ -9,9 +9,9 @@
 	};
 	1D3623250D0F684500981E51 /* DoubleCameraAppDelegate.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1965, 1274}}";
-			sepNavSelRange = "{252, 0}";
-			sepNavVisRange = "{3, 1068}";
+			sepNavIntBoundsRect = "{{0, 0}, {1965, 1157}}";
+			sepNavSelRange = "{529, 0}";
+			sepNavVisRange = "{294, 1295}";
 			sepNavWindowFrame = "{{15, 76}, {903, 697}}";
 		};
 	};
@@ -41,7 +41,6 @@
 		activeSDKPreference = iphoneos4.2;
 		activeTarget = 1D6058900D05DD3D006BFB54 /* DoubleCamera */;
 		addToTargets = (
-			1D6058900D05DD3D006BFB54 /* DoubleCamera */,
 		);
 		breakpoints = (
 			90B38EDF12CC58FA007DB4C6 /* CameraOverlayController.m:171 */,
@@ -374,7 +373,7 @@
 		fRef = 90B38A9112C92B15007DB4C6 /* OrganizerViewController.m */;
 		name = "OrganizerViewController.m: 200";
 		rLen = 74;
-		rLoc = 8006;
+		rLoc = 8265;
 		rType = 0;
 		vrLen = 1387;
 		vrLoc = 7147;
@@ -1155,9 +1154,9 @@
 	};
 	90B3892612C8272F007DB4C6 /* ReviewPhotoViewController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1104, 4420}}";
+			sepNavIntBoundsRect = "{{0, 0}, {1104, 4446}}";
 			sepNavSelRange = "{3861, 0}";
-			sepNavVisRange = "{2658, 1563}";
+			sepNavVisRange = "{2877, 1471}";
 			sepNavWindowFrame = "{{176, 68}, {750, 558}}";
 		};
 	};
@@ -1171,9 +1170,9 @@
 	};
 	90B38A9112C92B15007DB4C6 /* OrganizerViewController.m */ = {
 		uiCtxt = {
-			sepNavIntBoundsRect = "{{0, 0}, {1139, 7150}}";
-			sepNavSelRange = "{1826, 0}";
-			sepNavVisRange = "{0, 1397}";
+			sepNavIntBoundsRect = "{{0, 0}, {1643, 7020}}";
+			sepNavSelRange = "{6472, 0}";
+			sepNavVisRange = "{10478, 1386}";
 		};
 	};
 	90B38A9612C92F45007DB4C6 /* UIImageExtras.h */ = {

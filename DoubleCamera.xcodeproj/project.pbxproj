@@ -145,6 +145,7 @@
 		909686C3132E03A5005D8A13 /* UploadViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = UploadViewController.xib; path = Classes/UploadViewController.xib; sourceTree = "<group>"; };
 		90968824132F620D005D8A13 /* ImagePickerOverlay~ipad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "ImagePickerOverlay~ipad.xib"; sourceTree = "<group>"; };
 		9096888C13301B9E005D8A13 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
+		90977D0C13316CAF00206807 /* passwords.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = passwords.h; sourceTree = "<group>"; };
 		90AE41BD12FCE3C700E59A29 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		90AE41BE12FCE3C700E59A29 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		90AE41BF12FCE3C700E59A29 /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
@@ -342,6 +343,7 @@
 			children = (
 				1D3623240D0F684500981E51 /* DoubleCameraAppDelegate.h */,
 				1D3623250D0F684500981E51 /* DoubleCameraAppDelegate.m */,
+				90977D0C13316CAF00206807 /* passwords.h */,
 			);
 			name = Main;
 			sourceTree = "<group>";
