@@ -7,6 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SlideReviewController.h"
+#import "ASIHTTPRequest.h"
 
 #define CHECK_ICON_TAG 222
 
@@ -27,6 +29,7 @@ typedef enum {
 	UIToolbar *multipleSelectionToolbar;
 	
 	NSMutableDictionary *doublePhotos;
+	NSMutableArray		*orderedPhotoKeys;
 
 	
 	NSMutableArray *selectedImages;
@@ -45,7 +48,8 @@ typedef enum {
 @property (nonatomic, retain) NSString *baseImageDirectory;
 @property (nonatomic, retain) NSMutableArray *selectedImages;
 
-@property (nonatomic, retain) NSMutableDictionary *doublePhotos;
+@property (nonatomic, retain) NSMutableDictionary	*doublePhotos;
+@property (nonatomic, retain) NSMutableArray		*orderedPhotoKeys;
 
 - (void)flipGesture:(UISwipeGestureRecognizer *)recognizer;
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch;
@@ -63,10 +67,14 @@ typedef enum {
 - (void)doneWithSelection;
 - (void)updateNavbarTitle;
 
+- (void)requestFinished:(ASIHTTPRequest *)request;
+- (void)requestFailed:(ASIHTTPRequest *)request;
+
 - (UIButton *)flipsideButton:(UIButton *)button;
 - (void)addCheck:(UIButton *)button;
 - (void)removeCheck:(UIButton *)button;
 - (BOOL)toggleSelection:(UIButton *)button;
 - (void)clearSelection;
+
 
 @end

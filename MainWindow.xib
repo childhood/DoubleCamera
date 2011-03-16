@@ -12,7 +12,7 @@
 		</object>
 		<object class="NSMutableArray" key="IBDocument.EditedObjectIDs">
 			<bool key="EncodedWithXMLCoder">YES</bool>
-			<integer value="21"/>
+			<integer value="10"/>
 		</object>
 		<object class="NSArray" key="IBDocument.PluginDependencies">
 			<bool key="EncodedWithXMLCoder">YES</bool>
@@ -70,7 +70,7 @@
 					<bool key="IBUIMultipleTouchEnabled">YES</bool>
 					<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 				</object>
-				<object class="NSArray" key="IBUIViewControllers">
+				<object class="NSMutableArray" key="IBUIViewControllers">
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<object class="IBUIViewController" id="943309135">
 						<object class="IBUINavigationItem" key="IBUINavigationItem" id="673464159">
@@ -79,7 +79,7 @@
 							<string key="targetRuntimeIdentifier">IBCocoaTouchFramework</string>
 						</object>
 						<reference key="IBUIParentViewController" ref="926119025"/>
-						<string key="IBUINibName">DoubleCameraViewController</string>
+						<string key="IBUINibName">ReviewView</string>
 						<object class="IBUISimulatedStatusBarMetrics" key="IBUISimulatedStatusBarMetrics"/>
 						<object class="IBUISimulatedOrientationMetrics" key="IBUISimulatedOrientationMetrics">
 							<int key="interfaceOrientation">1</int>
@@ -116,6 +116,14 @@
 						<reference key="destination" ref="926119025"/>
 					</object>
 					<int key="connectionID">26</int>
+				</object>
+				<object class="IBConnectionRecord">
+					<object class="IBCocoaTouchOutletConnection" key="connection">
+						<string key="label">viewController</string>
+						<reference key="source" ref="664661524"/>
+						<reference key="destination" ref="943309135"/>
+					</object>
+					<int key="connectionID">28</int>
 				</object>
 			</object>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -201,12 +209,12 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>UIApplication</string>
 					<string>UIResponder</string>
-					<string>DoubleCameraViewController</string>
+					<string>ReviewPhotoViewController</string>
 					<string>{{350, 15}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>{{525, 346}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
-					<string>{{346, 174}, {320, 480}}</string>
+					<string>{{373, 192}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>DoubleCameraAppDelegate</string>
@@ -229,7 +237,7 @@
 				</object>
 			</object>
 			<nil key="sourceID"/>
-			<int key="maxID">26</int>
+			<int key="maxID">28</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -248,7 +256,7 @@
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UINavigationController</string>
-							<string>DoubleCameraViewController</string>
+							<string>ReviewPhotoViewController</string>
 							<string>UIWindow</string>
 						</object>
 					</object>
@@ -268,7 +276,7 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">viewController</string>
-								<string key="candidateClassName">DoubleCameraViewController</string>
+								<string key="candidateClassName">ReviewPhotoViewController</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">window</string>
@@ -290,14 +298,14 @@
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
-					<string key="className">DoubleCameraViewController</string>
+					<string key="className">ReviewPhotoViewController</string>
 					<string key="superclassName">UIViewController</string>
 					<object class="NSMutableDictionary" key="actions">
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>flipImage</string>
-							<string>launchCameraAction:</string>
+							<string>save</string>
+							<string>trash</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
@@ -309,17 +317,17 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
-							<string>flipImage</string>
-							<string>launchCameraAction:</string>
+							<string>save</string>
+							<string>trash</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<object class="IBActionInfo">
-								<string key="name">flipImage</string>
+								<string key="name">save</string>
 								<string key="candidateClassName">id</string>
 							</object>
 							<object class="IBActionInfo">
-								<string key="name">launchCameraAction:</string>
+								<string key="name">trash</string>
 								<string key="candidateClassName">id</string>
 							</object>
 						</object>
@@ -330,14 +338,12 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>backImageView</string>
 							<string>frontImageView</string>
-							<string>loadingView</string>
 							<string>mainToolbar</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>UIImageView</string>
 							<string>UIImageView</string>
-							<string>UIActivityIndicatorView</string>
 							<string>UIToolbar</string>
 						</object>
 					</object>
@@ -347,7 +353,6 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>backImageView</string>
 							<string>frontImageView</string>
-							<string>loadingView</string>
 							<string>mainToolbar</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
@@ -361,10 +366,6 @@
 								<string key="candidateClassName">UIImageView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
-								<string key="name">loadingView</string>
-								<string key="candidateClassName">UIActivityIndicatorView</string>
-							</object>
-							<object class="IBToOneOutletInfo">
 								<string key="name">mainToolbar</string>
 								<string key="candidateClassName">UIToolbar</string>
 							</object>
@@ -372,7 +373,7 @@
 					</object>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">Classes/DoubleCameraViewController.h</string>
+						<string key="minorKey">Classes/ReviewPhotoViewController.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">
@@ -475,14 +476,6 @@
 					<object class="IBClassDescriptionSource" key="sourceIdentifier" id="356479594">
 						<string key="majorKey">IBFrameworkSource</string>
 						<string key="minorKey">UIKit.framework/Headers/UIResponder.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
-					<string key="className">UIActivityIndicatorView</string>
-					<string key="superclassName">UIView</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBFrameworkSource</string>
-						<string key="minorKey">UIKit.framework/Headers/UIActivityIndicatorView.h</string>
 					</object>
 				</object>
 				<object class="IBPartialClassDescription">

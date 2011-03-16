@@ -25,6 +25,8 @@
 	
 	CGSize screenSize;
 	CGSize thumbnailSize;
+	
+	BOOL generatingScreenImages;
 }
 
 @property (nonatomic, retain) UIImage *frontScreenImage;
@@ -44,17 +46,21 @@
 
 - initThumbnailsWithPath:(NSString *)path andPrefix:(NSString *)prefix;
 
+- (BOOL)loadJPEGData;
 - (BOOL)releaseJPEGData;
 
 - (NSInteger)deleteFromDisk;
 - (NSInteger)saveToDisk;
 - (BOOL)generateThumbnails;
 - (BOOL)generateScreenImages;
+- (BOOL)freeScreenImages;
 
 - (NSString *)backImagePath;
 - (NSString *)frontImagePath;
 - (NSString *)backThumbnailPath;
 - (NSString *)frontThumbnailPath;
+
+- (BOOL)uploadWithAlert:(UIAlertView *)alertView;
 
 
 @end

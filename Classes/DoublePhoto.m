@@ -8,6 +8,10 @@
 
 #import "DoublePhoto.h"
 #import "UIImageExtras.h"
+#import "ASIS3ObjectRequest.h"
+#import "Utilities.h"
+#import "ASIFormDataRequest.h"
+#import "JSON.h"
 
 
 @implementation DoublePhoto 
@@ -102,15 +106,46 @@
 	return deletedFiles;
 }
 
-- (BOOL)generateScreenImages {
-	// If the files haven't been loaded yet, create images directly from files
+- (BOOL)loadJPEGData {
 	if(self.frontJPEGData == nil || self.backJPEGData == nil) {
-		self.frontScreenImage = [[UIImage imageWithContentsOfFile:[self frontImagePath]] imageByScalingAndCroppingForSize:screenSize];
-		self.backScreenImage = [[UIImage imageWithContentsOfFile:[self backImagePath]] imageByScalingAndCroppingForSize:screenSize];
+		self.frontJPEGData = [NSData dataWithContentsOfFile:[self frontImagePath]];
+		self.backJPEGData = [NSData dataWithContentsOfFile:[self backImagePath]];
+		return YES;
 	}
-	else {
-		self.frontScreenImage = [[UIImage imageWithData:self.frontJPEGData] imageByScalingAndCroppingForSize:screenSize];
-		self.backScreenImage = [[UIImage imageWithData:self.backJPEGData] imageByScalingAndCroppingForSize:screenSize];
+	else return NO;
+}
+
+- (BOOL)generateScreenImages {
+	if(!generatingScreenImages) {
+		// If the files haven't been loaded yet, create images directly from files
+		if(self.frontScreenImage == nil || self.backScreenImage == nil) {
+			generatingScreenImages = YES;
+			if(self.frontJPEGData == nil || self.backJPEGData == nil) {
+				UIImage *fullFront = [UIImage imageWithContentsOfFile:[self frontImagePath]];
+				UIImage *fullBack = [UIImage imageWithContentsOfFile:[self backImagePath]];
+				
+				if(fullFront.size.width > fullFront.size.height) {
+					screenSize = CGSizeMake(screenSize.height, screenSize.width);
+				}
+				
+				self.frontScreenImage = [fullFront imageByScalingAndCroppingForSize:screenSize];
+				self.backScreenImage = [fullBack imageByScalingAndCroppingForSize:screenSize];
+				//self.frontScreenImage = fullFront;
+				//self.backScreenImage  = fullBack;
+			}
+			else {
+				UIImage *fullFront = [UIImage imageWithData:self.frontJPEGData];
+				UIImage *fullBack = [UIImage imageWithData:self.backJPEGData];
+				
+				if(fullFront.size.width > fullFront.size.height) {
+					screenSize = CGSizeMake(screenSize.height, screenSize.width);
+				}
+				
+				self.frontScreenImage = [fullFront imageByScalingAndCroppingForSize:screenSize];
+				self.backScreenImage = [fullBack imageByScalingAndCroppingForSize:screenSize];
+			}
+		}
+		generatingScreenImages = NO;
 	}
 	
 	if(self.frontScreenImage != nil && self.backScreenImage != nil)
@@ -118,6 +153,15 @@
 	else
 		return NO;
 }
+
+- (BOOL)freeScreenImages {
+	self.frontJPEGData = nil;
+	self.backJPEGData  = nil;
+	self.frontScreenImage = nil;
+	self.backScreenImage = nil;
+	return YES;
+}
+
 - (BOOL)generateThumbnails {
 	if(self.frontThumbnailJPEGData == nil || self.backThumbnailJPEGData == nil) {
 		// If there is no thumbnail file data, create a thumbnail from the full JPEG image data
@@ -172,6 +216,94 @@
 	[filePath release];
 	
 	[super dealloc];
+}
+
+#pragma mark -
+#pragma mark Upload functions
+- (BOOL)uploadWithAlert:(UIAlertView *)alertView {
+	// Upload back photo to S3
+	// -----------------------
+	__block ASIS3ObjectRequest *backRequest = [ASIS3ObjectRequest PUTRequestForFile:[self backImagePath]
+																		 withBucket:@"doublecamera"
+																				key:[NSString stringWithFormat:@"photos/%@%@-back-o.jpg", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix]];
+	
+	backRequest.shouldStreamPostDataFromDisk = YES;
+	[backRequest setAccessPolicy:@"public-read"];
+	[backRequest setDelegate:self];
+	
+	[backRequest setCompletionBlock:^{
+		// Upload front photo to S3
+		// ------------------------
+		__block ASIS3ObjectRequest *frontRequest = [ASIS3ObjectRequest PUTRequestForFile:[self frontImagePath]
+																			  withBucket:@"doublecamera"
+																					 key:[NSString stringWithFormat:@"photos/%@%@-front-o.jpg", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix]];
+		
+		NSLog(@"photos/%@%@-front-o.jpg", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix);
+		frontRequest.shouldStreamPostDataFromDisk = YES;
+		[frontRequest setAccessPolicy:@"public-read"];
+		[frontRequest setDelegate:self];
+		[frontRequest setCompletionBlock:^{
+			// Make a POST request to the script that inserts a new record in the database
+			// ---------------------------------------------------------------------------
+			NSURL *url = [NSURL URLWithString:@"http://benjaminlotan.com/doublecamera/newphoto.php"];
+			__block ASIFormDataRequest *insertRequest= [ASIFormDataRequest requestWithURL:url];
+			//[insertRequest addPostValue:[[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"] forKey:@"user-id"];
+			[insertRequest addPostValue:filePrefix forKey:@"photo-id"];
+			[insertRequest addPostValue:@"kronick" forKey:@"username"];
+			[insertRequest addPostValue:[Utilities MD5:@"123f"] forKey:@"password"];
+			[insertRequest addPostValue:[NSString stringWithFormat:@"http://doublecamera.s3.amazonaws.com/photos/%@%@", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix] forKey:@"url-base"];
+			[insertRequest addPostValue:@"" forKey:@"date-taken"];
+			[insertRequest addPostValue:@"" forKey:@"caption-front"];
+			[insertRequest addPostValue:@"" forKey:@"caption-back"];
+			
+			[insertRequest setDelegate:self];
+			[insertRequest setCompletionBlock:^{
+				NSString *responseString = [insertRequest responseString];
+				NSDictionary *responseDict = [responseString JSONValue];
+				NSInteger statusCode = [[responseDict valueForKey:@"status"] integerValue];
+				NSLog(@"Status code: %i Reason: %@", statusCode, [responseDict valueForKey:@"reason"]);
+				switch(statusCode) {
+					case 200:{	// All OK
+						UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Upload Complete"
+																				 message: @"Your photos have been uploaded."
+																				delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
+						[completeAlert show];
+						break;}
+					case 500:{	// Server error
+						UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Server Error"
+																				 message: @"There was an error processing your upload. Please try again later."
+																				delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
+						[completeAlert show];
+						break;}						
+					case 409:{	// Duplicate
+						UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Duplicate upload"
+																				 message: @"This photo has already been uploaded!"
+																				delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
+						[completeAlert show];
+						break;}												
+					case 401:	// Not Authorized
+					case 403:{
+						UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Login Failure"
+																				 message: @"Your username or password is no longer valid. Please login again from the settings screen."
+																				delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
+						[completeAlert show];
+						break;}												
+				}
+			}];
+			
+			[insertRequest startAsynchronous];						
+		}];
+		[frontRequest setFailedBlock: ^{
+			NSLog(@"Front upload failed: %@", [frontRequest error]);
+		}];
+		
+		[frontRequest startAsynchronous];
+	}];
+	[backRequest setFailedBlock: ^{
+		NSLog(@"Back upload failed: %@", [backRequest error]);
+	}];
+	
+	[backRequest startAsynchronous];
 }
 
 

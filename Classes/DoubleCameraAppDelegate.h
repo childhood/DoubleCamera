@@ -8,17 +8,17 @@
 
 #import <UIKit/UIKit.h>
 
-@class DoubleCameraViewController;
+@class ReviewPhotoViewController;
 
 @interface DoubleCameraAppDelegate : NSObject <UIApplicationDelegate> {
     UIWindow *window;
-    DoubleCameraViewController *viewController;
+    ReviewPhotoViewController *viewController;
 	UINavigationController *navigationController;
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 @property (nonatomic, retain) IBOutlet UINavigationController *navigationController;
-@property (nonatomic, retain) IBOutlet DoubleCameraViewController *viewController;
+@property (nonatomic, retain) IBOutlet ReviewPhotoViewController *viewController;
 
 @end
 

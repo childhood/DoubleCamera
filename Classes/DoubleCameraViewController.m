@@ -12,16 +12,15 @@
 
 @synthesize reviewController, organizerController, slideTimer, frontImageView, backImageView, loadingView, mainToolbar;
 
-/*
+
 // The designated initializer. Override to perform setup that is required before the view is loaded.
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        // Custom initialization
+		
     }
     return self;
 }
-*/
 
 /*
 // Implement loadView to create a view hierarchy programmatically, without using a nib.
@@ -49,14 +48,11 @@
 
 	self.navigationController.delegate = self;
 	
-	[loadingView startAnimating];
-	loadingView.hidden = NO;
-
 	// Initialize children view controllers
-	self.reviewController = [[[ReviewPhotoViewController alloc] initWithNibName:@"ReviewView" bundle:nil] autorelease];
-	self.organizerController = [[[OrganizerViewController alloc] initWithNibName:@"OrganizerView" bundle:nil] autorelease];
+	self.reviewController = [[ReviewPhotoViewController alloc] initWithNibName:@"ReviewView" bundle:nil];
+	self.organizerController = [[OrganizerViewController alloc] initWithNibName:@"OrganizerView" bundle:nil];
 	self.organizerController.title = @"Double Album";
-
+	
 	
 	self.navigationItem.backBarButtonItem = [[[UIBarButtonItem alloc] initWithTitle:@"Back" style:UIBarButtonItemStylePlain target:nil action:nil] autorelease];
 	NSLog(@"Loaded main view controller.");
@@ -73,6 +69,10 @@
 	//UITapGestureRecognizer *tapGestureRecognizer = [[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(toggleToolbars)] autorelease];
 	//tapGestureRecognizer.delegate = self;
 	//[self.view addGestureRecognizer:tapGestureRecognizer];	
+	
+	
+	self.frontImageView.image = [UIImage imageNamed:@"homescreen"];
+	self.backImageView.image = [UIImage imageNamed:@"homescreen"];
 }
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
@@ -164,11 +164,14 @@
 - (void)viewDidUnload {
 	// Release any retained subviews of the main view.
 	// e.g. self.myOutlet = nil;
-	NSLog(@"Exiting program...");
+	[self.reviewController release];
+	[self.organizerController release];
+	NSLog(@"Unloading main view...");
 }
 
 
 - (void)dealloc {
+	NSLog(@"Deallocing main view...");
     [super dealloc];
 }
 
