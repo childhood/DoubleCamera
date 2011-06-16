@@ -23,6 +23,13 @@
 	IBOutlet UITableViewCell *twitterCell;
 	IBOutlet UITableViewCell *facebookCell;
 	IBOutlet UITableViewCell *tumblrCell;
+	IBOutlet UISwitch *twitterSwitch;
+	IBOutlet UISwitch *facebookSwitch;
+	IBOutlet UISwitch *tumblrSwitch;
+	
+	IBOutlet UIWebView *facebookConnectWebView;
+	IBOutlet UIButton *facebookConnectCloseButton;
+	IBOutlet UIView *facebookConnectView;
 	
 	DoublePhoto *toUpload;
 }
@@ -41,8 +48,16 @@
 @property (nonatomic,retain) IBOutlet UITableViewCell *twitterCell;
 @property (nonatomic,retain) IBOutlet UITableViewCell *facebookCell;
 @property (nonatomic,retain) IBOutlet UITableViewCell *tumblrCell;
+@property (nonatomic,retain) IBOutlet UISwitch *twitterSwitch;
+@property (nonatomic,retain) IBOutlet UISwitch *facebookSwitch;
+@property (nonatomic,retain) IBOutlet UISwitch *tumblrSwitch;
+
+@property (nonatomic,retain) IBOutlet UIWebView *facebookConnectWebView;
+@property (nonatomic,retain) IBOutlet UIButton *facebookConnectCloseButton;
+@property (nonatomic,retain) IBOutlet UIView *facebookConnectView;
 
 - (id)init;
 - (void)startUpload;
-
+- (void)facebookConnect;
+- (IBAction)closeFacebookConnect;
 @end

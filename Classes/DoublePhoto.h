@@ -7,7 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ASIHTTPRequest.h"
+#import "ASINetworkQueue.h"
 
+typedef struct {
+	NSString *frontCaption;
+	NSString *backCaption;
+	NSString *timeTaken;
+	BOOL shareOnTwitter;
+	BOOL shareOnFacebook;
+	BOOL shareOnTumblr;
+} UploadMetaData;
 
 @interface DoublePhoto : NSObject {
 	UIImage *frontScreenImage;
@@ -27,6 +37,10 @@
 	CGSize thumbnailSize;
 	
 	BOOL generatingScreenImages;
+	
+	UploadMetaData metaData;
+	ASINetworkQueue *uploadQueue;
+	UIBackgroundTaskIdentifier backgroundTask;
 }
 
 @property (nonatomic, retain) UIImage *frontScreenImage;
@@ -41,6 +55,9 @@
 @property (nonatomic, retain) NSString *filePrefix;
 @property (nonatomic, retain) NSString *filePath;
 
+@property (nonatomic, retain) ASINetworkQueue *uploadQueue;
+
+- (id) init;
 - initWithFrontData:(NSData *)frontData andBackData:(NSData *)backData;
 - initWithPath:(NSString *)path andPrefix:(NSString *)prefix;
 
@@ -62,5 +79,9 @@
 
 - (BOOL)uploadWithAlert:(UIAlertView *)alertView;
 
+- (void) setMetaData:(UploadMetaData)data;
+- (void) updateMetaData;
+
+- (void) request:(ASIHTTPRequest *) req didSendBytes:(int) bytes;
 
 @end

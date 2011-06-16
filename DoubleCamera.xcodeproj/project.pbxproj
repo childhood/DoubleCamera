@@ -49,6 +49,11 @@
 		909686C4132E03A5005D8A13 /* UploadViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 909686C2132E03A5005D8A13 /* UploadViewController.m */; };
 		909686C5132E03A5005D8A13 /* UploadViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 909686C3132E03A5005D8A13 /* UploadViewController.xib */; };
 		90968825132F620D005D8A13 /* ImagePickerOverlay~ipad.xib in Resources */ = {isa = PBXBuildFile; fileRef = 90968824132F620D005D8A13 /* ImagePickerOverlay~ipad.xib */; };
+		90977E351331F04300206807 /* arrow_left@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90977E331331F04300206807 /* arrow_left@2x.png */; };
+		90977E361331F04300206807 /* arrow_right@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90977E341331F04300206807 /* arrow_right@2x.png */; };
+		90977E4E1331F08900206807 /* arrow_left_48@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90977E4C1331F08900206807 /* arrow_left_48@2x.png */; };
+		90977E4F1331F08900206807 /* arrow_right_48@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90977E4D1331F08900206807 /* arrow_right_48@2x.png */; };
+		90977E511331F86000206807 /* camera_button@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90977E501331F86000206807 /* camera_button@2x.png */; };
 		90AE41C012FCE3C700E59A29 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90AE41BE12FCE3C700E59A29 /* LoginViewController.m */; };
 		90AE41C112FCE3C700E59A29 /* LoginView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 90AE41BF12FCE3C700E59A29 /* LoginView.xib */; };
 		90B3892812C8272F007DB4C6 /* ReviewPhotoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90B3892612C8272F007DB4C6 /* ReviewPhotoViewController.m */; };
@@ -71,7 +76,6 @@
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* DoubleCameraAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DoubleCameraAppDelegate.h; path = Classes/DoubleCameraAppDelegate.h; sourceTree = "<group>"; };
 		1D3623250D0F684500981E51 /* DoubleCameraAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DoubleCameraAppDelegate.m; path = Classes/DoubleCameraAppDelegate.m; sourceTree = "<group>"; };
-		1D6058910D05DD3D006BFB54 /* DoubleCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoubleCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		2899E5210DE3E06400AC0155 /* DoubleCameraViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DoubleCameraViewController.xib; sourceTree = "<group>"; };
@@ -146,9 +150,15 @@
 		90968824132F620D005D8A13 /* ImagePickerOverlay~ipad.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = "ImagePickerOverlay~ipad.xib"; sourceTree = "<group>"; };
 		9096888C13301B9E005D8A13 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Entitlements.plist; sourceTree = "<group>"; };
 		90977D0C13316CAF00206807 /* passwords.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = passwords.h; sourceTree = "<group>"; };
+		90977E331331F04300206807 /* arrow_left@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_left@2x.png"; sourceTree = "<group>"; };
+		90977E341331F04300206807 /* arrow_right@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_right@2x.png"; sourceTree = "<group>"; };
+		90977E4C1331F08900206807 /* arrow_left_48@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_left_48@2x.png"; sourceTree = "<group>"; };
+		90977E4D1331F08900206807 /* arrow_right_48@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "arrow_right_48@2x.png"; sourceTree = "<group>"; };
+		90977E501331F86000206807 /* camera_button@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "camera_button@2x.png"; sourceTree = "<group>"; };
 		90AE41BD12FCE3C700E59A29 /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
 		90AE41BE12FCE3C700E59A29 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		90AE41BF12FCE3C700E59A29 /* LoginView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = LoginView.xib; sourceTree = "<group>"; };
+		90B1523913A9A1160041AE51 /* DoubleCamera.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DoubleCamera.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		90B3892512C8272F007DB4C6 /* ReviewPhotoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ReviewPhotoViewController.h; path = Classes/ReviewPhotoViewController.h; sourceTree = "<group>"; };
 		90B3892612C8272F007DB4C6 /* ReviewPhotoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ReviewPhotoViewController.m; path = Classes/ReviewPhotoViewController.m; sourceTree = "<group>"; };
 		90B3892712C8272F007DB4C6 /* ReviewView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = ReviewView.xib; path = Classes/ReviewView.xib; sourceTree = "<group>"; };
@@ -208,7 +218,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* DoubleCamera.app */,
+				90B1523913A9A1160041AE51 /* DoubleCamera.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -245,6 +255,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				90977E301331F03700206807 /* Icons */,
 				90323CF212DAD7A2004C991C /* homescreen@2x.png */,
 				9062718412CE7B0300A7FB1D /* icon_persp@2x.png */,
 				9062716612CE785200A7FB1D /* icon@2x.png */,
@@ -336,6 +347,18 @@
 				909686C2132E03A5005D8A13 /* UploadViewController.m */,
 			);
 			name = Upload;
+			sourceTree = "<group>";
+		};
+		90977E301331F03700206807 /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				90977E501331F86000206807 /* camera_button@2x.png */,
+				90977E4C1331F08900206807 /* arrow_left_48@2x.png */,
+				90977E4D1331F08900206807 /* arrow_right_48@2x.png */,
+				90977E331331F04300206807 /* arrow_left@2x.png */,
+				90977E341331F04300206807 /* arrow_right@2x.png */,
+			);
+			name = Icons;
 			sourceTree = "<group>";
 		};
 		90B38D8712CBD54B007DB4C6 /* Main */ = {
@@ -438,7 +461,7 @@
 			);
 			name = DoubleCamera;
 			productName = DoubleCamera;
-			productReference = 1D6058910D05DD3D006BFB54 /* DoubleCamera.app */;
+			productReference = 90B1523913A9A1160041AE51 /* DoubleCamera.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -484,6 +507,11 @@
 				90AE41C112FCE3C700E59A29 /* LoginView.xib in Resources */,
 				909686C5132E03A5005D8A13 /* UploadViewController.xib in Resources */,
 				90968825132F620D005D8A13 /* ImagePickerOverlay~ipad.xib in Resources */,
+				90977E351331F04300206807 /* arrow_left@2x.png in Resources */,
+				90977E361331F04300206807 /* arrow_right@2x.png in Resources */,
+				90977E4E1331F08900206807 /* arrow_left_48@2x.png in Resources */,
+				90977E4F1331F08900206807 /* arrow_right_48@2x.png in Resources */,
+				90977E511331F86000206807 /* camera_button@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -569,13 +597,15 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer: Samuel Kronick (2PS8HHFURV)";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "31376A61-99E1-48AC-B641-B074F1168C6C";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Debug;
 		};
@@ -584,12 +614,13 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				CODE_SIGN_ENTITLEMENTS = Entitlements.plist;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Samuel Kronick";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				PREBINDING = NO;
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "C989CD3B-D3BB-4645-88D2-F713A62F2F14";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

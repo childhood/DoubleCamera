@@ -35,10 +35,14 @@
 		[self.view addGestureRecognizer:tapGestureRecognizer];	
 		
 		// Set back navigation title
-		UIBarButtonItem *temporaryBarButtonItem = [[UIBarButtonItem alloc] init];
+		UIBarButtonItem *temporaryBarButtonItem = [[[UIBarButtonItem alloc] init] autorelease];
 		temporaryBarButtonItem.title = @"Back";
 		self.navigationItem.backBarButtonItem = temporaryBarButtonItem;
-		[temporaryBarButtonItem release];
+		
+		self.loadingView = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 20,20)] autorelease];
+		self.loadingView.hidesWhenStopped = YES;
+		UIBarButtonItem *activityButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:self.loadingView] autorelease];
+		self.navigationItem.rightBarButtonItem = activityButtonItem;
     }
     return self;
 }
@@ -150,6 +154,7 @@
 	[self.view setNeedsDisplay];
 }
 
+
 #pragma mark -
 #pragma mark IBActions
 
@@ -195,7 +200,9 @@
 }
 
 - (IBAction)trash {
-
+	UIActionSheet *deleteActionSheet = [[[UIActionSheet alloc] initWithTitle:@"Are you sure?" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Delete Selected" otherButtonTitles:nil] autorelease];
+	deleteActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
+	[deleteActionSheet showInView:self.view];
 }
 
 - (IBAction)showActionSheet {
@@ -255,7 +262,7 @@
 - (void)hideToolbars {
 	if(mainToolbar.hidden == NO) {
 		[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationFade];
-		[UIView animateWithDuration:0.2 animations:^{
+		[UIView animateWithDuration:0.4 animations:^{
 			mainToolbar.alpha = 0;
 			self.navigationController.navigationBar.alpha = 0;
 		} completion:^(BOOL b){
@@ -270,12 +277,44 @@
 		mainToolbar.hidden = NO;
 		self.navigationController.navigationBar.hidden = NO;
 		[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
-		[UIView animateWithDuration:0.2 animations:^{
+		[UIView animateWithDuration:0.4 animations:^{
 			mainToolbar.alpha = 1;
 			self.navigationController.navigationBar.alpha = 1;
 		} completion:^(BOOL b) { }];
 	}
 }
 
+#pragma -
+#pragma mark UIActionSheetDelegate
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+	if(actionSheet.title == @"Are you sure?") {
+		switch (buttonIndex) {
+			case 0: {
+				// Delete
+				NSInteger currentIndex = [self.orderedPhotoKeys indexOfObject:self.currentDoublePhoto.filePrefix];
+				[self.doublePhotos removeObjectForKey:self.currentDoublePhoto.filePrefix];
+				[self.orderedPhotoKeys removeObject:self.currentDoublePhoto.filePrefix];
+				[self.currentDoublePhoto deleteFromDisk];
+				if([self.orderedPhotoKeys count] > 0) {
+					if(currentIndex > 0) {	// Go to the previous
+						[self loadDoublePhoto:[self.doublePhotos objectForKey:[self.orderedPhotoKeys objectAtIndex:currentIndex-1]]];
+					}
+					else {	// Go to the next
+						[self loadDoublePhoto:[self.doublePhotos objectForKey:[self.orderedPhotoKeys objectAtIndex:currentIndex]]];
+					}
+					[self updateImageViews];
+				}
+				else {
+					[self.navigationController popViewControllerAnimated:YES];
+				}
+				
+				break;
+			}
+			default: case 1:
+				// Do nothing
+				break;
+		}			
+	}
+}
 
 @end

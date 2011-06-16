@@ -10,6 +10,7 @@
 #import "ImagePickerOverlayController.h"
 #import "DoublePhoto.h"
 #import "UploadViewController.h"
+#import "LoginViewController.h"
 
 @implementation ReviewPhotoViewController
 
@@ -23,14 +24,10 @@
 	NSLog(@"View Did Load");
     [super viewDidLoad];	
 	
+	self.userDefaults = [NSUserDefaults standardUserDefaults];
+	
 	// Set this class to handle navigation events
 	self.navigationController.delegate = self;
-	
-	// Load user settings into defaults dictionary
-	self.userDefaults = [NSUserDefaults standardUserDefaults];
-	NSMutableDictionary *defaults = [NSMutableDictionary dictionaryWithObject: [NSNumber numberWithInt:0] forKey:@"file_number"];
-	[defaults setObject:[NSNumber numberWithInt:0] forKey:@"user_id"];
-	[self.userDefaults registerDefaults:defaults];
 	
 	// HARDCODED USER ID
 	//[userDefaults setInteger:0 forKey:@"user_id"];
@@ -55,7 +52,8 @@
 		self.imagePickerController.sourceType = UIImagePickerControllerSourceTypeCamera;
 		self.imagePickerController.allowsEditing = NO;
 		self.imagePickerController.showsCameraControls = NO;
-		
+		self.imagePickerController.cameraViewTransform = CGAffineTransformScale(self.imagePickerController.cameraViewTransform, 1.05, 1.05);
+		self.imagePickerController.cameraFlashMode = UIImagePickerControllerCameraFlashModeOff;
 		firstLaunch = YES;
 	}
 	
@@ -182,7 +180,7 @@
 - (void)hideToolbars {
 	if(mainToolbar.hidden == NO) {
 		[[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationFade];
-		[UIView animateWithDuration:0.2 animations:^{
+		[UIView animateWithDuration:0.4 animations:^{
 			mainToolbar.alpha = 0;
 		} completion:^(BOOL b){
 			mainToolbar.hidden = YES;
@@ -194,7 +192,7 @@
 	if(mainToolbar.hidden == YES) {
 		mainToolbar.hidden = NO;
 		[[UIApplication sharedApplication] setStatusBarHidden:NO withAnimation:UIStatusBarAnimationFade];
-		[UIView animateWithDuration:0.2 animations:^{
+		[UIView animateWithDuration:0.4 animations:^{
 			mainToolbar.alpha = 1;
 		} completion:^(BOOL b) { }];
 	}
@@ -223,7 +221,7 @@
 
 
 - (void)saveFiles {
-	self.capturedDoublePhoto = [[DoublePhoto alloc] initWithFrontData:UIImageJPEGRepresentation([self.capturedImages objectForKey:@"front"], 1) andBackData:UIImageJPEGRepresentation([self.capturedImages objectForKey:@"rear"], 1)];
+	self.capturedDoublePhoto = [[DoublePhoto alloc] initWithFrontData:UIImageJPEGRepresentation([self.capturedImages objectForKey:@"front"], .5) andBackData:UIImageJPEGRepresentation([self.capturedImages objectForKey:@"rear"], .5)];
 	NSInteger fileInteger = [userDefaults integerForKey:@"file_number"];
 	NSString *filePrefix = [NSString stringWithFormat:@"%.4i", fileInteger];
 	
@@ -292,7 +290,7 @@
 		picker.cameraDevice = picker.cameraDevice == UIImagePickerControllerCameraDeviceRear ? UIImagePickerControllerCameraDeviceFront
 																							 : UIImagePickerControllerCameraDeviceRear;
 		
-		[self startSecondPictureTimer];
+		[self performSelector:@selector(startSecondPictureTimer) withObject:nil afterDelay:1];
 		[self.capturedImages setValue:pickedImage forKey:key];
 	}
 	else {
@@ -329,7 +327,7 @@
 		justTookPicture = YES;
 		
 		self.imagePickerController.view.superview.backgroundColor = [UIColor blackColor];
-		[UIView animateWithDuration:0.4 delay:0.4 options:nil animations:^{ self.imagePickerController.view.alpha = 0; }
+		[UIView animateWithDuration:0.3 delay:0.0 options:nil animations:^{ self.imagePickerController.view.alpha = 0; }
 				completion:^(BOOL b) { [self dismissModalViewControllerAnimated:NO]; self.imagePickerController.view.alpha = 1; }];
 		
 		
@@ -340,7 +338,16 @@
 - (void)imagePickerControllerDidCancel:(UIImagePickerController *)picker {
 	[self dismissModalViewControllerAnimated:YES];
 	
-	[[self navigationController] pushViewController:self.organizerController animated:YES];
+	// Ask user to log in if they haven't already
+	if([[NSUserDefaults standardUserDefaults] integerForKey:@"user_id"] == 0 || [[[NSUserDefaults standardUserDefaults] stringForKey:@"username"] isEqualToString:@""]) {
+		LoginViewController *loginView = [[[LoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+		loginView.title = @"Sign In";
+		loginView.returnController = self.organizerController;
+		[self.navigationController pushViewController:loginView animated:YES];
+	}
+	else {
+		[[self navigationController] pushViewController:self.organizerController animated:YES];
+	}
 }
 
 @end

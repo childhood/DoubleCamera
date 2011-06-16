@@ -9,12 +9,19 @@
 #import <UIKit/UIKit.h>
 
 
-@interface LoginViewController : UIViewController {
-	UITextField *userIDField;
+@interface LoginViewController : UIViewController <UITextFieldDelegate> {
+	IBOutlet UITextField *usernameField;
+	IBOutlet UITextField *passwordField;
+	IBOutlet UIActivityIndicatorView *activityIndicator;
+	UIViewController *returnController;
 }
 
-@property (nonatomic,retain) IBOutlet UITextField *userIDField;
+@property (nonatomic,retain) IBOutlet UITextField *usernameField;
+@property (nonatomic,retain) IBOutlet UITextField *passwordField;
+@property (nonatomic,retain) IBOutlet UIActivityIndicatorView *activityIndicator;
 
-- (IBAction) save;
+@property (nonatomic,retain) UIViewController *returnController;
+
+- (IBAction) signIn;
 
 @end

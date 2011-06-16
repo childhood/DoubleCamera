@@ -10,17 +10,17 @@
 #import "DoublePhoto.h"
 
 
-@interface SlideReviewController : UIViewController <UIGestureRecognizerDelegate> {
+@interface SlideReviewController : UIViewController <UIGestureRecognizerDelegate, UIActionSheetDelegate> {
 	IBOutlet UIImageView *frontImageView;
 	IBOutlet UIImageView *backImageView;
-	IBOutlet UIActivityIndicatorView *loadingView;
+	UIActivityIndicatorView *loadingView;
 	
 	DoublePhoto *currentDoublePhoto;
 	DoublePhoto *nextDoublePhoto;
 	DoublePhoto *prevDoublePhoto;
 	
-	NSDictionary *doublePhotos;
-	NSArray		*orderedPhotoKeys;
+	NSMutableDictionary *doublePhotos;
+	NSMutableArray		*orderedPhotoKeys;
 	
 	NSString	*basePath;
 	
@@ -32,21 +32,23 @@
 
 @property (nonatomic, retain) IBOutlet UIImageView *frontImageView;
 @property (nonatomic, retain) IBOutlet UIImageView *backImageView;
-@property (nonatomic, retain) IBOutlet UIActivityIndicatorView *loadingView;
 @property (nonatomic, retain) IBOutlet UIToolbar *mainToolbar;
+@property (nonatomic, retain) UIActivityIndicatorView *loadingView;
 
 @property (nonatomic, retain) DoublePhoto *currentDoublePhoto;
-@property (nonatomic, retain) NSDictionary *doublePhotos;
+@property (nonatomic, retain) NSMutableDictionary *doublePhotos;
 @property (nonatomic, retain) DoublePhoto *nextDoublePhoto;
 @property (nonatomic, retain) DoublePhoto *prevDoublePhoto;
 
-@property (nonatomic, retain) NSArray *orderedPhotoKeys;
+@property (nonatomic, retain) NSMutableArray *orderedPhotoKeys;
 
 @property (nonatomic, retain) NSString *basePath;
 
 - (void)loadDoublePhoto:(DoublePhoto *)dp;
 - (void)updateImageViews;
 
+
+- (void)reloadKeys;
 - (void)toggleToolbars;
 - (void)hideToolbars;
 - (void)showToolbars;

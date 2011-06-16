@@ -24,6 +24,17 @@
 - (void)applicationDidFinishLaunching:(UIApplication *)application { 
 	NSLog(@"Launch successful.");
     
+	// Load user settings into defaults dictionary
+	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+	NSMutableDictionary *defaults = [NSMutableDictionary dictionaryWithObject: [NSNumber numberWithInt:0] forKey:@"file_number"];
+	[defaults setObject:[NSNumber numberWithInt:0] forKey:@"user_id"];
+	[defaults setObject:@"" forKey:@"username"];
+	[defaults setObject:@"" forKey:@"password"];
+	
+	[userDefaults registerDefaults:defaults];	
+	
+	//[[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"username"];
+	
     // Set Amazon S3 keys
 	[ASIS3Request setSharedSecretAccessKey:S3_SECRET_ACCESS_KEY];
 	[ASIS3Request setSharedAccessKey:S3_SHARED_ACCESS_KEY];

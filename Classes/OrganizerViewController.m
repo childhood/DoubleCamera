@@ -14,6 +14,7 @@
 #import "ASIFormDataRequest.h"
 #import "ASIS3ObjectRequest.h"
 #import "Utilities.h"
+#import "UploadViewController.h"
 
 @implementation OrganizerViewController
 
@@ -33,21 +34,29 @@
 
 
 - (void)viewWillAppear:(BOOL)animated {
-	// Ask user to log in if they haven't already
-	if([[NSUserDefaults standardUserDefaults] integerForKey:@"user_id"] == 0) {
-		LoginViewController *loginView = [[[LoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
-		[self.navigationController pushViewController:loginView animated:YES];
-	}
-	
-	[super viewWillAppear:animated];
 	[self clearSelection];
 	mode = OrganizerModeSelectOneToView;
 	[self reloadThumbnails];
 
+	self.wantsFullScreenLayout = YES;
 	[[UIApplication sharedApplication] setStatusBarHidden:NO];
 	[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent];
 	self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-	self.wantsFullScreenLayout = YES;
+	
+	self.view.frame = [[UIScreen mainScreen] applicationFrame];
+	[super viewWillAppear:animated];
+}
+
+
+- (void)viewDidAppear:(BOOL)animated {
+	// Ask user to log in if they haven't already
+	/*
+	if([[NSUserDefaults standardUserDefaults] integerForKey:@"user_id"] == 0 || [[[NSUserDefaults standardUserDefaults] stringForKey:@"username"] isEqualToString:@""]) {
+		LoginViewController *loginView = [[[LoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+		loginView.title = @"Sign In";
+		[self.navigationController presentModalViewController:loginView animated:YES];
+	}
+	 */
 }
 
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
@@ -75,17 +84,7 @@
 	[self.view addGestureRecognizer:switchPhotoGestureLeft];
 }
 
-- (void)reloadThumbnails {
-	// Remove subviews
-	for(UIView *subview in [[[frontScrollView subviews] copy] autorelease]) {
-		if([subview isKindOfClass:[UIButton class]])
-			[subview removeFromSuperview];
-	}
-	for(UIView *subview in [[[backScrollView subviews] copy] autorelease]) {
-		if([subview isKindOfClass:[UIButton class]])
-			[subview removeFromSuperview];
-	}	
-	
+- (void)reloadKeys {
 	self.orderedPhotoKeys = [NSMutableArray array];
 	
 	// Load images from directory and add UIImage thumbnails
@@ -111,7 +110,7 @@
 	
 	[doublePhotos setDictionary:newDoublePhotos];
 	
-
+	
 	// Sort the keys array
 	[self.orderedPhotoKeys sortUsingComparator: ^(id obj1, id obj2) {
 		
@@ -124,6 +123,20 @@
 		}
 		return (NSComparisonResult)NSOrderedSame;
 	}];
+}
+
+- (void)reloadThumbnails {
+	// Remove subviews
+	for(UIView *subview in [[[frontScrollView subviews] copy] autorelease]) {
+		if([subview isKindOfClass:[UIButton class]])
+			[subview removeFromSuperview];
+	}
+	for(UIView *subview in [[[backScrollView subviews] copy] autorelease]) {
+		if([subview isKindOfClass:[UIButton class]])
+			[subview removeFromSuperview];
+	}	
+	
+	[self reloadKeys];
 	
 	// Make buttons for each image
 	int i=0;
@@ -305,67 +318,12 @@
 		}
 		case OrganizerModeSelectToUpload: {
 			NSLog(@"Starting upload...");
+			int i=0;
 			for(NSString *filePrefix in selectedImages) {
 				DoublePhoto *dp = (DoublePhoto*)[self.doublePhotos objectForKey:filePrefix];
-
-				// Upload back photo to S3
-				// -----------------------
-				__block ASIS3ObjectRequest *backRequest = [ASIS3ObjectRequest PUTRequestForFile:[dp backImagePath]
-																		 withBucket:@"doublecamera"
-																				key:[NSString stringWithFormat:@"photos/%@%@-back-o.jpg", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix]];
-				
-				backRequest.shouldStreamPostDataFromDisk = YES;
-				[backRequest setAccessPolicy:@"public-read"];
-				[backRequest setDelegate:self];
-				
-				[backRequest setCompletionBlock:^{
-					// Upload front photo to S3
-					// ------------------------
-					__block ASIS3ObjectRequest *frontRequest = [ASIS3ObjectRequest PUTRequestForFile:[dp frontImagePath]
-																						 withBucket:@"doublecamera"
-																								key:[NSString stringWithFormat:@"photos/%@%@-front-o.jpg", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix]];
-					
-					NSLog(@"photos/%@%@-front-o.jpg", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix);
-					frontRequest.shouldStreamPostDataFromDisk = YES;
-					[frontRequest setAccessPolicy:@"public-read"];
-					[frontRequest setDelegate:self];
-					[frontRequest setCompletionBlock:^{
-						// Make a POST request to the script that inserts a new record in the database
-						// ---------------------------------------------------------------------------
-						NSURL *url = [NSURL URLWithString:@"http://benjaminlotan.com/doublecamera/newphoto.php"];
-						__block ASIFormDataRequest *insertRequest= [ASIFormDataRequest requestWithURL:url];
-						//[insertRequest addPostValue:[[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"] forKey:@"user-id"];
-						[insertRequest addPostValue:filePrefix forKey:@"photo-id"];
-						[insertRequest addPostValue:@"kronick" forKey:@"username"];
-						[insertRequest addPostValue:[Utilities MD5:@"123f"] forKey:@"password"];
-						[insertRequest addPostValue:[NSString stringWithFormat:@"http://doublecamera.s3.amazonaws.com/photos/%@%@", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix] forKey:@"url-base"];
-						[insertRequest addPostValue:@"" forKey:@"date-taken"];
-						[insertRequest addPostValue:@"" forKey:@"caption-front"];
-						[insertRequest addPostValue:@"" forKey:@"caption-back"];
-						
-						[insertRequest setDelegate:self];
-						[insertRequest setCompletionBlock:^{
-							NSString *responseString = [insertRequest responseString];
-							NSLog(@"%@",responseString);
-							
-							UIAlertView *completeAlert = [[UIAlertView alloc] initWithTitle: @"Upload complete" message: @"Your photos have been uploaded." delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil];
-							[completeAlert show];
-							[completeAlert release];							
-						}];
-						
-						[insertRequest startAsynchronous];						
-					}];
-					[frontRequest setFailedBlock: ^{
-						NSLog(@"Front upload failed: %@", [frontRequest error]);
-					}];
-					
-					[frontRequest startAsynchronous];
-				}];
-				[backRequest setFailedBlock: ^{
-					NSLog(@"Back upload failed: %@", [backRequest error]);
-				}];
-				
-				[backRequest startAsynchronous];
+				UploadViewController *uploadView = [[[UploadViewController alloc] init] autorelease];
+				uploadView.toUpload = dp;
+				[self.navigationController pushViewController:uploadView animated:(++i==[selectedImages count] ? YES : NO)];
 			}
 
 			[self updateMode:OrganizerModeSelectOneToView];

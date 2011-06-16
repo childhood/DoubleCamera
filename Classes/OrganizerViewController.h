@@ -59,6 +59,7 @@ typedef enum {
 
 - (void)deleteSelectedPhotos;
 
+- (void)reloadKeys;
 - (void)reloadThumbnails;
 - (void)resetToolbars;
 - (void)showToolbar;

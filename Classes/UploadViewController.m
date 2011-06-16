@@ -7,11 +7,14 @@
 //
 
 #import "UploadViewController.h"
+#import "LoginViewController.h"
 
 
 @implementation UploadViewController
 @synthesize toUpload;
 @synthesize sideADescriptionCell, sideBDescriptionCell, twitterCell, tumblrCell, facebookCell;
+@synthesize twitterSwitch, tumblrSwitch, facebookSwitch;
+@synthesize facebookConnectView, facebookConnectWebView, facebookConnectCloseButton;
 @synthesize sideAImageView, sideBImageView;
 @synthesize sideADescriptionLabel, sideBDescriptionLabel;
 @synthesize sideADescription, sideBDescription;
@@ -29,6 +32,12 @@
 		self.title = @"Upload";
 		UIBarButtonItem *rightBarButton = [[[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(startUpload)] autorelease];
 		self.navigationItem.rightBarButtonItem = rightBarButton;	
+		self.navigationItem.leftBarButtonItem.title = @"Cancel";
+		
+		// Set back navigation title
+		UIBarButtonItem *temporaryBarButtonItem = [[[UIBarButtonItem alloc] init] autorelease];
+		temporaryBarButtonItem.title = @"Cancel";
+		self.navigationItem.backBarButtonItem = temporaryBarButtonItem;		
     }
     return self;
 }
@@ -79,11 +88,31 @@
 #pragma mark Uploading actions
 
 - (void)startUpload {
-	NSLog(@"Calling the upload function of the photo...");
-	if(self.toUpload != nil) {
-		// TODO: Build metadata dictionary
+	// Ask user to log in if they haven't already
+	if([[NSUserDefaults standardUserDefaults] integerForKey:@"user_id"] == 0 || [[[NSUserDefaults standardUserDefaults] stringForKey:@"username"] isEqualToString:@""]) {
+		LoginViewController *loginView = [[[LoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+		loginView.title = @"Sign In";
+		loginView.returnController = self;
+		[self.navigationController pushViewController:loginView animated:YES];
+	}
+	else if(self.toUpload != nil) {
+		NSLog(@"Calling the upload function of the photo...");
+		NSLog(@"Building metadata...");
+		UploadMetaData metaData;
+		metaData.frontCaption = [sideADescription.text copy];
+		metaData.backCaption = [sideBDescription.text copy];
+		metaData.shareOnTwitter = self.twitterSwitch.isOn;
+		metaData.shareOnFacebook = self.facebookSwitch.isOn;
+		metaData.shareOnTumblr = self.tumblrSwitch.isOn;
+		metaData.timeTaken = @"000000";
+		
+		[self.toUpload setMetaData:metaData];
+
 		[self.toUpload uploadWithAlert:nil];
 		[self.navigationController popViewControllerAnimated:YES];
+	}
+	else {
+		NSLog(@"toUpload was nil for some reason.");
 	}
 }
 
@@ -145,6 +174,26 @@
 	return tableView.rowHeight;			
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	switch([indexPath section]) {
+		case 0:	// Description section			
+			// Nothing to do here
+			break;
+		case 1: // Sharing section
+			switch([indexPath row]) {
+				case 0:
+					// TODO: Configure Twitter
+					break;
+				case 1:
+					[self facebookConnect];
+					break;
+				case 2:
+					// TODO: Configure Tumblr
+					break;
+			}
+	}	
+}
+
 #pragma mark -
 #pragma mark UITextViewDelegate
 - (void)textViewDidBeginEditing:(UITextView *)textView {
@@ -166,6 +215,30 @@
     }
 	else if([[textView text] length] <= 60 || [text isEqualToString:@""]) return YES;
 	else return NO;
+}
+
+#pragma mark -
+#pragma mark Handle connections
+
+- (void) facebookConnect {
+	NSURL *url = [NSURL URLWithString:@"http://www.facebook.com/connect/uiserver.php?app_id=160548430646821&next=http://socialprintshop.com/doublecam/connect.php&display=page&cancel_url=http://socialprintshop.com/doublecam/connect.php&locale=en_US&perms=email,offline_access&return_session=1&session_version=3&fbconnect=1&canvas=0&legacy_return=1&method=permissions.request&display=wap"];
+	NSURLRequest *requestObj = [NSURLRequest requestWithURL:url];
+	[facebookConnectWebView loadRequest:requestObj];
+
+	[facebookConnectView setAlpha:0];
+	[facebookConnectView setHidden:NO];
+	[UIView animateWithDuration:0.2 animations:^{
+		[facebookConnectView setAlpha:1];
+	} completion:^(BOOL b){}];
+	
+}
+
+- (IBAction) closeFacebookConnect {
+	[UIView animateWithDuration:0.2 animations:^{
+		[facebookConnectView setAlpha:0];
+	} completion:^(BOOL b){ [facebookConnectView setHidden:YES]; }];
+	
+	NSLog(@"Page at close: %@", [facebookConnectWebView stringByEvaluatingJavaScriptFromString:@"document.title"]);
 }
 
 @end
