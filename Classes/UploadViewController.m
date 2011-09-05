@@ -8,11 +8,13 @@
 
 #import "UploadViewController.h"
 #import "LoginViewController.h"
+#import "Reachability.h"
+#import "Utilities.h"
 
 
 @implementation UploadViewController
 @synthesize toUpload;
-@synthesize sideADescriptionCell, sideBDescriptionCell, twitterCell, tumblrCell, facebookCell;
+@synthesize tableView, sideADescriptionCell, sideBDescriptionCell, twitterCell, tumblrCell, facebookCell;
 @synthesize twitterSwitch, tumblrSwitch, facebookSwitch;
 @synthesize facebookConnectView, facebookConnectWebView, facebookConnectCloseButton;
 @synthesize sideAImageView, sideBImageView;
@@ -30,7 +32,7 @@
     if (self) {
         // Set up navigation bar stuff
 		self.title = @"Upload";
-		UIBarButtonItem *rightBarButton = [[[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(startUpload)] autorelease];
+		UIBarButtonItem *rightBarButton = [[[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(startUpload)] autorelease];
 		self.navigationItem.rightBarButtonItem = rightBarButton;	
 		self.navigationItem.leftBarButtonItem.title = @"Cancel";
 		
@@ -45,6 +47,7 @@
 - (void)viewWillAppear:(BOOL)animated {
 	self.sideAImageView.image = self.toUpload.frontThumbnailImage;
 	self.sideBImageView.image = self.toUpload.backThumbnailImage;
+    [self.tableView setContentInset:UIEdgeInsetsMake(0,0,200,0)];
 	[[UIApplication sharedApplication] setStatusBarHidden:NO];
 	[[UIApplication sharedApplication] setStatusBarStyle: UIStatusBarStyleDefault];
 	[self.navigationController setNavigationBarHidden:NO];
@@ -88,8 +91,14 @@
 #pragma mark Uploading actions
 
 - (void)startUpload {
+    if(![Reachability connectedToTheNet]) {
+        UIAlertView *notConnectedAlert = [[[UIAlertView alloc] initWithTitle: @"No Connection"
+                                                                 message: @"You are not connected to the 'net. Please try again later!"
+                                                                delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
+        [notConnectedAlert show];        
+    }
 	// Ask user to log in if they haven't already
-	if([[NSUserDefaults standardUserDefaults] integerForKey:@"user_id"] == 0 || [[[NSUserDefaults standardUserDefaults] stringForKey:@"username"] isEqualToString:@""]) {
+	else if([[NSUserDefaults standardUserDefaults] integerForKey:@"user_id"] == 0 || [[[NSUserDefaults standardUserDefaults] stringForKey:@"username"] isEqualToString:@""]) {
 		LoginViewController *loginView = [[[LoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
 		loginView.title = @"Sign In";
 		loginView.returnController = self;
@@ -143,7 +152,7 @@
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    return 2;
+    return 1;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
@@ -151,7 +160,8 @@
 		case 0:
 			return @"";
 		case 1:
-			return @"Sharing";
+            return @"\n\n";
+			//return @"Sharing";
 	}
 	return @"";
 }
@@ -160,14 +170,16 @@
 		case 0: // Description section
 			return 2;
 		case 1:	// Sharing section
-			return 3;
+            return 0;
+			//return 3;
 	}
 	return 0;
 }
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
 	switch([indexPath section]) {
 		case 0: // Description Section
-			return tableView.rowHeight * 2;
+			//return tableView.rowHeight * 4;
+            return 158;
 		case 1:	// Sharing Section
 			return tableView.rowHeight;
 	}

@@ -16,6 +16,7 @@
 		28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 28AD733E0D9D9553002E5188 /* MainWindow.xib */; };
 		28D7ACF80DDB3853001CB0EB /* DoubleCameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 28D7ACF70DDB3853001CB0EB /* DoubleCameraViewController.m */; };
 		90045AF012F80DFA00AA72EC /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90045AEF12F80DFA00AA72EC /* QuartzCore.framework */; };
+		901C462514127515006914CA /* URLs.plist in Resources */ = {isa = PBXBuildFile; fileRef = 901C462414127515006914CA /* URLs.plist */; };
 		902100A712C1D08F000320E2 /* CameraOverlayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 902100A612C1D08F000320E2 /* CameraOverlayController.m */; };
 		902100B812C1D32F000320E2 /* CameraOverlayView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 902100B712C1D32F000320E2 /* CameraOverlayView.xib */; };
 		90323CF312DAD7A2004C991C /* homescreen@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90323CF212DAD7A2004C991C /* homescreen@2x.png */; };
@@ -61,7 +62,7 @@
 		90B38A9312C92B15007DB4C6 /* OrganizerViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90B38A9112C92B15007DB4C6 /* OrganizerViewController.m */; };
 		90B38A9412C92B15007DB4C6 /* OrganizerView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 90B38A9212C92B15007DB4C6 /* OrganizerView.xib */; };
 		90B38A9812C92F45007DB4C6 /* UIImageExtras.m in Sources */ = {isa = PBXBuildFile; fileRef = 90B38A9712C92F45007DB4C6 /* UIImageExtras.m */; };
-		90B38C2012C9A61F007DB4C6 /* check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90B38C1F12C9A61F007DB4C6 /* check@2x.png */; };
+		90B38C2012C9A61F007DB4C6 /* red-check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90B38C1F12C9A61F007DB4C6 /* red-check@2x.png */; };
 		90B38D9212CBD64F007DB4C6 /* DoublePhoto.m in Sources */ = {isa = PBXBuildFile; fileRef = 90B38D9112CBD64F007DB4C6 /* DoublePhoto.m */; };
 		90B3904412CD6989007DB4C6 /* ImagePickerOverlayController.m in Sources */ = {isa = PBXBuildFile; fileRef = 90B3904212CD6989007DB4C6 /* ImagePickerOverlayController.m */; };
 		90B3904512CD6989007DB4C6 /* ImagePickerOverlay.xib in Resources */ = {isa = PBXBuildFile; fileRef = 90B3904312CD6989007DB4C6 /* ImagePickerOverlay.xib */; };
@@ -70,6 +71,15 @@
 		90BD7B7712C2C23C00016434 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90BD7B7612C2C23C00016434 /* AVFoundation.framework */; };
 		90CF271A12C3011C0062BEB3 /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90CF271912C3011C0062BEB3 /* CoreVideo.framework */; };
 		90CF272412C301580062BEB3 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90CF272312C301580062BEB3 /* CoreMedia.framework */; };
+		90D83E5313C8836000B894F2 /* SyncManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 90D83E5213C8835F00B894F2 /* SyncManager.m */; };
+		90D83E5513C8BC5000B894F2 /* link_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90D83E5413C8BC5000B894F2 /* link_icon@2x.png */; };
+		90D83E5813C8CEEB00B894F2 /* upload-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90D83E5613C8CEEB00B894F2 /* upload-icon@2x.png */; };
+		90D83E5913C8CEEB00B894F2 /* uploaded-icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90D83E5713C8CEEB00B894F2 /* uploaded-icon@2x.png */; };
+		90D83E5D13C8D39E00B894F2 /* blue-check@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90D83E5C13C8D39E00B894F2 /* blue-check@2x.png */; };
+		90D83E5F13C8F79E00B894F2 /* link_icon_plain@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90D83E5E13C8F79E00B894F2 /* link_icon_plain@2x.png */; };
+		90D83E6313C904C100B894F2 /* up_bar_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90D83E6213C904C100B894F2 /* up_bar_icon@2x.png */; };
+		90D83E6513C910FF00B894F2 /* link_bar_icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 90D83E6413C910FF00B894F2 /* link_bar_icon@2x.png */; };
+		90E05EFA13DA1F6C002BF397 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 90E05EF913DA1F6C002BF397 /* Settings.bundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -86,6 +96,7 @@
 		32CA4F630368D1EE00C91783 /* DoubleCamera_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DoubleCamera_Prefix.pch; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* DoubleCamera-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "DoubleCamera-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		90045AEF12F80DFA00AA72EC /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		901C462414127515006914CA /* URLs.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = URLs.plist; sourceTree = "<group>"; };
 		902100A512C1D08F000320E2 /* CameraOverlayController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CameraOverlayController.h; path = Classes/CameraOverlayController.h; sourceTree = "<group>"; };
 		902100A612C1D08F000320E2 /* CameraOverlayController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CameraOverlayController.m; path = Classes/CameraOverlayController.m; sourceTree = "<group>"; };
 		902100B712C1D32F000320E2 /* CameraOverlayView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CameraOverlayView.xib; sourceTree = "<group>"; };
@@ -167,7 +178,7 @@
 		90B38A9212C92B15007DB4C6 /* OrganizerView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = OrganizerView.xib; path = Classes/OrganizerView.xib; sourceTree = "<group>"; };
 		90B38A9612C92F45007DB4C6 /* UIImageExtras.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UIImageExtras.h; sourceTree = "<group>"; };
 		90B38A9712C92F45007DB4C6 /* UIImageExtras.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UIImageExtras.m; sourceTree = "<group>"; };
-		90B38C1F12C9A61F007DB4C6 /* check@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "check@2x.png"; sourceTree = "<group>"; };
+		90B38C1F12C9A61F007DB4C6 /* red-check@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "red-check@2x.png"; sourceTree = "<group>"; };
 		90B38D9012CBD64F007DB4C6 /* DoublePhoto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DoublePhoto.h; sourceTree = "<group>"; };
 		90B38D9112CBD64F007DB4C6 /* DoublePhoto.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DoublePhoto.m; sourceTree = "<group>"; };
 		90B3904112CD6989007DB4C6 /* ImagePickerOverlayController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImagePickerOverlayController.h; sourceTree = "<group>"; };
@@ -179,6 +190,16 @@
 		90BD7B7612C2C23C00016434 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		90CF271912C3011C0062BEB3 /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		90CF272312C301580062BEB3 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		90D83E5113C8835F00B894F2 /* SyncManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SyncManager.h; sourceTree = "<group>"; };
+		90D83E5213C8835F00B894F2 /* SyncManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SyncManager.m; sourceTree = "<group>"; };
+		90D83E5413C8BC5000B894F2 /* link_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "link_icon@2x.png"; sourceTree = "<group>"; };
+		90D83E5613C8CEEB00B894F2 /* upload-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "upload-icon@2x.png"; sourceTree = "<group>"; };
+		90D83E5713C8CEEB00B894F2 /* uploaded-icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "uploaded-icon@2x.png"; sourceTree = "<group>"; };
+		90D83E5C13C8D39E00B894F2 /* blue-check@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "blue-check@2x.png"; sourceTree = "<group>"; };
+		90D83E5E13C8F79E00B894F2 /* link_icon_plain@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "link_icon_plain@2x.png"; sourceTree = "<group>"; };
+		90D83E6213C904C100B894F2 /* up_bar_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "up_bar_icon@2x.png"; sourceTree = "<group>"; };
+		90D83E6413C910FF00B894F2 /* link_bar_icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "link_bar_icon@2x.png"; sourceTree = "<group>"; };
+		90E05EF913DA1F6C002BF397 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,6 +232,8 @@
 				90B38A9712C92F45007DB4C6 /* UIImageExtras.m */,
 				90968680132DE661005D8A13 /* Utilities.h */,
 				90968681132DE661005D8A13 /* Utilities.m */,
+				90D83E5113C8835F00B894F2 /* SyncManager.h */,
+				90D83E5213C8835F00B894F2 /* SyncManager.m */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -255,13 +278,15 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				90977D0C13316CAF00206807 /* passwords.h */,
+				90E05EF913DA1F6C002BF397 /* Settings.bundle */,
 				90977E301331F03700206807 /* Icons */,
 				90323CF212DAD7A2004C991C /* homescreen@2x.png */,
 				9062718412CE7B0300A7FB1D /* icon_persp@2x.png */,
 				9062716612CE785200A7FB1D /* icon@2x.png */,
 				90B38D8912CBD5A6007DB4C6 /* xibs */,
-				90B38C1F12C9A61F007DB4C6 /* check@2x.png */,
 				8D1107310486CEB800E47090 /* DoubleCamera-Info.plist */,
+				901C462414127515006914CA /* URLs.plist */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -352,6 +377,14 @@
 		90977E301331F03700206807 /* Icons */ = {
 			isa = PBXGroup;
 			children = (
+				90D83E6413C910FF00B894F2 /* link_bar_icon@2x.png */,
+				90D83E6213C904C100B894F2 /* up_bar_icon@2x.png */,
+				90D83E5E13C8F79E00B894F2 /* link_icon_plain@2x.png */,
+				90D83E5C13C8D39E00B894F2 /* blue-check@2x.png */,
+				90B38C1F12C9A61F007DB4C6 /* red-check@2x.png */,
+				90D83E5613C8CEEB00B894F2 /* upload-icon@2x.png */,
+				90D83E5713C8CEEB00B894F2 /* uploaded-icon@2x.png */,
+				90D83E5413C8BC5000B894F2 /* link_icon@2x.png */,
 				90977E501331F86000206807 /* camera_button@2x.png */,
 				90977E4C1331F08900206807 /* arrow_left_48@2x.png */,
 				90977E4D1331F08900206807 /* arrow_right_48@2x.png */,
@@ -366,7 +399,6 @@
 			children = (
 				1D3623240D0F684500981E51 /* DoubleCameraAppDelegate.h */,
 				1D3623250D0F684500981E51 /* DoubleCameraAppDelegate.m */,
-				90977D0C13316CAF00206807 /* passwords.h */,
 			);
 			name = Main;
 			sourceTree = "<group>";
@@ -498,7 +530,7 @@
 				902100B812C1D32F000320E2 /* CameraOverlayView.xib in Resources */,
 				90B3892912C8272F007DB4C6 /* ReviewView.xib in Resources */,
 				90B38A9412C92B15007DB4C6 /* OrganizerView.xib in Resources */,
-				90B38C2012C9A61F007DB4C6 /* check@2x.png in Resources */,
+				90B38C2012C9A61F007DB4C6 /* red-check@2x.png in Resources */,
 				90B3904512CD6989007DB4C6 /* ImagePickerOverlay.xib in Resources */,
 				90B390D012CD9310007DB4C6 /* SlideView.xib in Resources */,
 				9062716712CE785200A7FB1D /* icon@2x.png in Resources */,
@@ -512,6 +544,15 @@
 				90977E4E1331F08900206807 /* arrow_left_48@2x.png in Resources */,
 				90977E4F1331F08900206807 /* arrow_right_48@2x.png in Resources */,
 				90977E511331F86000206807 /* camera_button@2x.png in Resources */,
+				90D83E5513C8BC5000B894F2 /* link_icon@2x.png in Resources */,
+				90D83E5813C8CEEB00B894F2 /* upload-icon@2x.png in Resources */,
+				90D83E5913C8CEEB00B894F2 /* uploaded-icon@2x.png in Resources */,
+				90D83E5D13C8D39E00B894F2 /* blue-check@2x.png in Resources */,
+				90D83E5F13C8F79E00B894F2 /* link_icon_plain@2x.png in Resources */,
+				90D83E6313C904C100B894F2 /* up_bar_icon@2x.png in Resources */,
+				90D83E6513C910FF00B894F2 /* link_bar_icon@2x.png in Resources */,
+				90E05EFA13DA1F6C002BF397 /* Settings.bundle in Resources */,
+				901C462514127515006914CA /* URLs.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -555,6 +596,7 @@
 				909686B7132DF4CB005D8A13 /* SBJsonParser.m in Sources */,
 				909686B8132DF4CB005D8A13 /* SBJsonWriter.m in Sources */,
 				909686C4132E03A5005D8A13 /* UploadViewController.m in Sources */,
+				90D83E5313C8836000B894F2 /* SyncManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -573,6 +615,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = DoubleCamera_Prefix.pch;
 				INFOPLIST_FILE = "DoubleCamera-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				PRODUCT_NAME = DoubleCamera;
 			};
 			name = Debug;
@@ -582,12 +625,17 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CODE_SIGN_ENTITLEMENTS = "~/Documents/iPhone/DoubleCamera/Entitlements.plist";
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(SDKROOT)/Library/System/Frameworks";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = DoubleCamera_Prefix.pch;
 				INFOPLIST_FILE = "DoubleCamera-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 4.0;
 				PRODUCT_NAME = DoubleCamera;
+				PROVISIONING_PROFILE = "";
+				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

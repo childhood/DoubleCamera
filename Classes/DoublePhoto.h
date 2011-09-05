@@ -71,6 +71,7 @@ typedef struct {
 - (BOOL)generateThumbnails;
 - (BOOL)generateScreenImages;
 - (BOOL)freeScreenImages;
+- (UIImage *)generateDiptych;
 
 - (NSString *)backImagePath;
 - (NSString *)frontImagePath;

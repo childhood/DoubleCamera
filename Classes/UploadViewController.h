@@ -11,6 +11,7 @@
 
 
 @interface UploadViewController : UIViewController <UITableViewDataSource, UITableViewDelegate, UITextViewDelegate> {
+    IBOutlet UITableView *tableView;
 	IBOutlet UITableViewCell *sideADescriptionCell;
 	IBOutlet UITableViewCell *sideBDescriptionCell;
 	IBOutlet UIImageView *sideAImageView;
@@ -36,6 +37,7 @@
 
 @property (nonatomic,retain) DoublePhoto *toUpload;
 
+@property (nonatomic,retain) IBOutlet UITableView *tableView;
 @property (nonatomic,retain) IBOutlet UITableViewCell *sideADescriptionCell;
 @property (nonatomic,retain) IBOutlet UITableViewCell *sideBDescriptionCell;
 @property (nonatomic,retain) IBOutlet UIImageView *sideAImageView;

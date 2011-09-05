@@ -10,10 +10,11 @@
 #import "DoublePhoto.h"
 #import "QuartzCore/QuartzCore.h"
 #import "UploadViewController.h"
+#import "SyncManager.h"
 
 @implementation SlideReviewController
 
-@synthesize frontImageView, backImageView, loadingView, mainToolbar, currentDoublePhoto, doublePhotos, nextDoublePhoto, prevDoublePhoto;
+@synthesize frontImageView, backImageView, loadingView, mainToolbar, currentDoublePhoto, doublePhotos, nextDoublePhoto, prevDoublePhoto, linkButton, actionButton, uploadButton;
 @synthesize orderedPhotoKeys, basePath;
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
@@ -39,9 +40,38 @@
 		temporaryBarButtonItem.title = @"Back";
 		self.navigationItem.backBarButtonItem = temporaryBarButtonItem;
 		
+        // Add a view for a possible link button and activity indicator
+        // ------------------------------------------------------------
+        NSLog(@"Setting up that shit");
+        self.linkButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        linkButton.frame = CGRectMake(0,0,30,30);
+        [linkButton setImage:[UIImage imageNamed:@"link_bar_icon.png"] forState:UIControlStateNormal];
+        [linkButton addTarget:self action:@selector(copyLink)
+             forControlEvents:UIControlEventTouchUpInside];
+        
+        linkButton.hidden = YES;
+        
+        self.uploadButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        uploadButton.frame = CGRectMake(0,0,30,30);
+        [uploadButton setImage:[UIImage imageNamed:@"up_bar_icon.png"] forState:UIControlStateNormal];
+        [uploadButton addTarget:self action:@selector(showActionSheet)
+                 forControlEvents:UIControlEventTouchUpInside];        
+        uploadButton.hidden = NO;
+        
+        UIView *actionButtonView = [[[UIView alloc] initWithFrame:CGRectMake(0,0, 30, 30)] autorelease];
+        
+        [actionButtonView addSubview:linkButton];
+        [actionButtonView addSubview:uploadButton];
+        NSMutableArray *oldToolbarItems = [[mainToolbar items] mutableCopy];
+        [oldToolbarItems removeObjectAtIndex:0];
+        [oldToolbarItems insertObject:[[[UIBarButtonItem alloc] initWithCustomView:actionButtonView] autorelease] atIndex:0];
+
+        [mainToolbar setItems:oldToolbarItems];
+        
 		self.loadingView = [[[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 20,20)] autorelease];
 		self.loadingView.hidesWhenStopped = YES;
-		UIBarButtonItem *activityButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:self.loadingView] autorelease];
+        
+		UIBarButtonItem *activityButtonItem = [[[UIBarButtonItem alloc] initWithCustomView:loadingView] autorelease];
 		self.navigationItem.rightBarButtonItem = activityButtonItem;
     }
     return self;
@@ -115,17 +145,17 @@
 					[[self.doublePhotos objectForKey:[orderedPhotoKeys objectAtIndex:(dpIndex+i+1)]] generateScreenImages];
 				if(dpIndex > i)
 					[[self.doublePhotos objectForKey:[orderedPhotoKeys objectAtIndex:(dpIndex-(i+1))]] generateScreenImages];
-			}
-			
-			//self.frontImageView.image = self.currentDoublePhoto.frontScreenImage;
-			//self.backImageView.image = self.currentDoublePhoto.backScreenImage;
-			//[self.frontImageView setNeedsDisplay];
-			//[self.backImageView setNeedsDisplay];
-			//[self.view setNeedsDisplay];
-			
+			}			
 		}); 		
 	}
 	
+    if([[SyncManager sharedSyncManager] isPhotoOnline:self.currentDoublePhoto.filePrefix]) {
+        [self showLinkButton];
+    }
+    else {
+        [self hideLinkButton];
+    }
+    
 	[self updateImageViews];
 }
 
@@ -157,7 +187,6 @@
 
 #pragma mark -
 #pragma mark IBActions
-
 - (IBAction)nextPhoto {
 	NSLog(@"Going to the next photo...");
 	if(self.orderedPhotoKeys != nil) {
@@ -212,12 +241,45 @@
 	NSString *filePrefix = dp.filePrefix;
 	[dp loadJPEGData];
 	 */
+    if([[SyncManager sharedSyncManager] isPhotoOnline:self.currentDoublePhoto.filePrefix]) {
+        // Show info screen
+    }
 	UploadViewController *uploadView = [[[UploadViewController alloc] initWithNibName:@"UploadViewController" bundle:nil] autorelease];
 	uploadView.toUpload = self.currentDoublePhoto;
 	[self.navigationController pushViewController:uploadView animated:YES];
 	//uploadView.sideAImageView.image = self.currentDoublePhoto.frontThumbnailImage;
 	//uploadView.sideBImageView.image = self.currentDoublePhoto.backThumbnailImage;
 
+}
+
+- (IBAction) copyLink {
+    NSString *string = [NSString stringWithFormat:@"%@%@",
+                        [[NSUserDefaults standardUserDefaults] objectForKey:@"web-base"],
+                        [[[SyncManager sharedSyncManager] onlineInfoForPhoto:currentDoublePhoto.filePrefix] objectForKey:@"short"]];
+    NSDictionary *item = [NSDictionary dictionaryWithObjectsAndKeys:
+                          string, @"public.utf8-plain-text", [NSURL URLWithString:string],
+                          (NSString *)kUTTypeURL,
+                          nil];
+    [UIPasteboard generalPasteboard].items = [NSArray arrayWithObject:item];   
+    
+    UIAlertView *copiedAlert = [[[UIAlertView alloc] initWithTitle: @"Link Copied"
+                                                           message: @"A link to this Double Photo has been copied to your clipboard. Go there now?"
+                                                          delegate: self cancelButtonTitle: @"Nope" otherButtonTitles: @"Yep",nil] autorelease];
+    [copiedAlert show];
+    
+}
+
+#pragma mark -
+#pragma mark UIAlertViewDelegate
+- (void)alertView:(UIAlertView *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+    if (buttonIndex == 0) {
+    }
+    else {
+        NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",
+                                           [[NSUserDefaults standardUserDefaults] objectForKey:@"web-base"],
+                                           [[[SyncManager sharedSyncManager] onlineInfoForPhoto:currentDoublePhoto.filePrefix] objectForKey:@"short"]]];
+        [[UIApplication sharedApplication] openURL:url];
+    }
 }
 
 #pragma mark -
@@ -282,6 +344,37 @@
 			self.navigationController.navigationBar.alpha = 1;
 		} completion:^(BOOL b) { }];
 	}
+}
+
+#pragma -
+#pragma mark Animations
+- (void)hideLinkButton {
+    if(!self.linkButton.hidden) {
+        self.uploadButton.alpha = 0;
+        self.uploadButton.hidden = NO;
+        [UIView animateWithDuration:0.4 animations:^{
+            self.linkButton.alpha = 0;
+            self.uploadButton.alpha = 1;
+        }
+        completion:^(BOOL b){
+            self.linkButton.hidden = YES;
+        }];
+    }
+}
+- (void)showLinkButton {
+    //[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:<#(id)#> action:<#(SEL)#>
+    //self.actionButton.
+    if(self.linkButton.hidden) {
+        self.linkButton.alpha = 0;
+        self.linkButton.hidden = NO;
+        [UIView animateWithDuration:0.4 animations:^{
+            self.linkButton.alpha = 1;
+            self.uploadButton.alpha = 0;
+        }
+        completion:^(BOOL b) {
+            self.uploadButton.hidden = YES;
+        }];
+    }
 }
 
 #pragma -

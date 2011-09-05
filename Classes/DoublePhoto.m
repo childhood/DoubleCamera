@@ -12,7 +12,7 @@
 #import "Utilities.h"
 #import "ASIFormDataRequest.h"
 #import "JSON.h"
-
+#import "SyncManager.h"
 
 @implementation DoublePhoto 
 
@@ -123,6 +123,9 @@
 		if([[NSData dataWithData:UIImageJPEGRepresentation(self.frontThumbnailImage, 0.8)] writeToFile:[self frontThumbnailPath] atomically:YES]) savedFiles++;
 		if([[NSData dataWithData:UIImageJPEGRepresentation(self.backThumbnailImage, 0.8)] writeToFile:[self backThumbnailPath] atomically:YES]) savedFiles++;
 	}
+    
+    if([[NSUserDefaults standardUserDefaults] boolForKey:@"save-diptych"])
+        UIImageWriteToSavedPhotosAlbum([self generateDiptych], nil, nil, nil);
 	
 	return savedFiles;
 }
@@ -145,6 +148,9 @@
 	}
 	else return NO;
 }
+
+#pragma mark -
+#pragma mark Resizing, etc
 
 - (BOOL)generateScreenImages {
 	if(!generatingScreenImages) {
@@ -220,6 +226,28 @@
 		return NO;
 }
 
+- (UIImage *) generateDiptych {
+    [self generateScreenImages];
+    CGImageRef front_image = [frontScreenImage CGImage];
+    CGImageRef back_image  = [backScreenImage CGImage];
+    
+    CGFloat width = CGImageGetWidth(front_image) + CGImageGetWidth(back_image);
+    CGFloat height = MAX(CGImageGetHeight(front_image), CGImageGetHeight(back_image));
+    
+    void *diptych_data = malloc(width * height * 4);
+    CGContextRef diptych_context = CGBitmapContextCreate(diptych_data, width, height, 8,
+                                                         width*4, CGImageGetColorSpace(front_image), kCGImageAlphaPremultipliedLast);
+    CGContextDrawImage(diptych_context, CGRectMake(0, 0, CGImageGetWidth(back_image), CGImageGetHeight(back_image)), back_image);
+    CGContextDrawImage(diptych_context, CGRectMake(CGImageGetWidth(back_image), 0, CGImageGetWidth(front_image), CGImageGetHeight(front_image)), front_image);
+
+    CGImageRef diptych_image = CGBitmapContextCreateImage(diptych_context);
+    UIImage *diptychImage = [UIImage imageWithCGImage:diptych_image];
+    CFRelease(diptych_image);
+    CGContextRelease(diptych_context);
+    
+    return diptychImage;
+}
+
 #pragma -
 #pragma mark Getters for generated paths
 
@@ -276,7 +304,8 @@
 	[backRequest setNumberOfTimesToRetryOnTimeout:3];
 	[backRequest setShouldContinueWhenAppEntersBackground:YES];
 	[backRequest setUploadProgressDelegate:self];
-	backRequest.userInfo = [NSDictionary dictionaryWithObject:@"back" forKey:@"id"];
+	backRequest.userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"back",@"id",
+                                                                  filePrefix, @"prefix", nil];
 	
 	ASIS3ObjectRequest *frontRequest = [ASIS3ObjectRequest PUTRequestForFile:[self frontImagePath]
 																  withBucket:@"doublecamera"
@@ -286,20 +315,26 @@
 	[frontRequest setAccessPolicy:@"public-read"];
 	[frontRequest setNumberOfTimesToRetryOnTimeout:3];
 	[frontRequest setShouldContinueWhenAppEntersBackground:YES];
-	frontRequest.userInfo = [NSDictionary dictionaryWithObject:@"front" forKey:@"id"];
+	frontRequest.userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"front",@"id",
+                                                                filePrefix, @"prefix", nil];
 	
-	NSURL *url = [NSURL URLWithString:@"http://benjaminlotan.com/doublecamera/newphoto.php"];
+	NSURL *url = [[SyncManager sharedSyncManager] URLForScript:@"new-photo"];
 	ASIFormDataRequest *insertRequest= [ASIFormDataRequest requestWithURL:url];
 	[ASIHTTPRequest setShouldThrottleBandwidthForWWAN:NO];
 	[insertRequest addPostValue:filePrefix forKey:@"photo-id"];
 	[insertRequest addPostValue:[[NSUserDefaults standardUserDefaults] stringForKey:@"username"] forKey:@"username"];
 	[insertRequest addPostValue:[Utilities MD5:[[NSUserDefaults standardUserDefaults] stringForKey:@"password"]] forKey:@"password"];
-	[insertRequest addPostValue:[NSString stringWithFormat:@"http://doublecamera.s3.amazonaws.com/photos/%@%@", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix] forKey:@"url-base"];
+	[insertRequest addPostValue:[NSString stringWithFormat:@"%@%@%@",
+                                 [[SyncManager sharedSyncManager] URLStringForScript:@"s3-base"],
+                                 [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"],
+                                 filePrefix]
+                         forKey:@"url-base"];
 	[insertRequest addPostValue:metaData.timeTaken forKey:@"time-taken"];
 	[insertRequest addPostValue:metaData.frontCaption forKey:@"caption-front"];
 	[insertRequest addPostValue:metaData.backCaption forKey:@"caption-back"];
 	[insertRequest setShouldContinueWhenAppEntersBackground:YES];
-	insertRequest.userInfo = [NSDictionary dictionaryWithObject:@"insert" forKey:@"id"];
+	insertRequest.userInfo = [NSDictionary dictionaryWithObjectsAndKeys:@"insert",@"id",
+                                                                filePrefix, @"prefix", nil];
 	
 	[self.uploadQueue addOperation:backRequest];
 	[self.uploadQueue addOperation:frontRequest];
@@ -311,93 +346,7 @@
 	}];
 	[self.uploadQueue go];
 	
-	/*
-	[backRequest setCompletionBlock:^{
-		NSLog(@"Back Upload Complete.");
-		// Upload front photo to S3
-		// ------------------------
-		__block ASIS3ObjectRequest *frontRequest = [ASIS3ObjectRequest PUTRequestForFile:[self frontImagePath]
-																			  withBucket:@"doublecamera"
-																					 key:[NSString stringWithFormat:@"photos/%@%@-front-o.jpg", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix]];
-	
-		frontRequest.shouldStreamPostDataFromDisk = YES;
-		[frontRequest setAccessPolicy:@"public-read"];
-		[frontRequest setDelegate:self];
-		[frontRequest setNumberOfTimesToRetryOnTimeout:3];
-		[frontRequest setShouldContinueWhenAppEntersBackground:YES];
-		
-		[frontRequest setCompletionBlock:^{
-			NSLog(@"Front upload complete.");
-			// Make a POST request to the script that inserts a new record in the database
-			// ---------------------------------------------------------------------------
-			NSURL *url = [NSURL URLWithString:@"http://benjaminlotan.com/doublecamera/newphoto.php"];
-			__block ASIFormDataRequest *insertRequest= [ASIFormDataRequest requestWithURL:url];
-			[ASIHTTPRequest setShouldThrottleBandwidthForWWAN:NO];
-			[insertRequest addPostValue:filePrefix forKey:@"photo-id"];
-			[insertRequest addPostValue:[[NSUserDefaults standardUserDefaults] stringForKey:@"username"] forKey:@"username"];
-			[insertRequest addPostValue:[Utilities MD5:[[NSUserDefaults standardUserDefaults] stringForKey:@"password"]] forKey:@"password"];
-			[insertRequest addPostValue:[NSString stringWithFormat:@"http://doublecamera.s3.amazonaws.com/photos/%@%@", [[NSUserDefaults standardUserDefaults] stringForKey:@"user_id"], filePrefix] forKey:@"url-base"];
-			[insertRequest addPostValue:metaData.timeTaken forKey:@"time-taken"];
-			[insertRequest addPostValue:metaData.frontCaption forKey:@"caption-front"];
-			[insertRequest addPostValue:metaData.backCaption forKey:@"caption-back"];
-			[insertRequest setShouldContinueWhenAppEntersBackground:YES];
-			
-			[insertRequest setDelegate:self];
-			[insertRequest setCompletionBlock:^{
-				NSString *responseString = [insertRequest responseString];
-				NSDictionary *responseDict = [responseString JSONValue];
-				NSInteger statusCode = [[responseDict valueForKey:@"status"] integerValue];
-				NSLog(@"Status code: %i Reason: %@", statusCode, [responseDict valueForKey:@"reason"]);
-				switch(statusCode) {
-					case 200:{	// All OK
-						UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Upload complete"
-																				 message: @"Your double photo has been uploaded!"
-																				delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
-						[completeAlert show];
-						break;}
-					case 500:{	// Server error
-						UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Server Error"
-																				 message: @"There was an error processing your upload. Please try again later."
-																				delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
-						[completeAlert show];
-						break;}						
-					case 409:{	// Duplicate
-						UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Duplicate upload"
-																				 message: @"The double photo you were trying to upload already exists."
-																				delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
-						[completeAlert show];
-						break;}												
-					case 401:	// Not Authorized
-					case 403:{
-						UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Login Failure"
-																				 message: @"Your username or password is no longer valid. Please login again from the settings screen."
-																				delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
-						[completeAlert show];
-						break;}												
-				}
-			}];
-			
-			[insertRequest startAsynchronous];						
-		}];
-		[frontRequest setFailedBlock: ^{
-			NSLog(@"Front upload failed: %@", [frontRequest error]);
-			UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Server Error"
-																	 message: @"There was an error processing your upload. Please try again later."
-																	delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
-			[completeAlert show];			
-		}];
-		
-		[frontRequest startAsynchronous];
-	}];
-	[backRequest setFailedBlock: ^{
-		NSLog(@"Back upload failed: %@", [backRequest error]);
-		UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Server Error"
-																 message: @"There was an error processing your upload. Please try again later."
-																delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
-		[completeAlert show];		
-	}];
-	[backRequest startAsynchronous];
-	 */
+    [[[SyncManager sharedSyncManager] pendingUploads] addObject:filePrefix];
 	
 }
 
@@ -415,29 +364,41 @@
 		NSInteger statusCode = [[responseDict valueForKey:@"status"] integerValue];
 		NSLog(@"Status code: %i Reason: %@", statusCode, [responseDict valueForKey:@"reason"]);
 		NSString *alertTitle, *alertMessage;
+        BOOL showAlert = YES;
 		switch(statusCode) {
 			case 200:{	// All OK
 				alertTitle = @"Upload complete";
-				alertMessage = @"Your doulbe photo has been uploaded!";
-				break;}
-			case 500:{	// Server error
-				alertTitle = @"Server Error";
-				alertMessage = @"There was an error processing your upload.";
-				break;}						
+				alertMessage = @"Your double photo has been uploaded!";
+                showAlert = NO;
+				break;}				
 			case 409:{	// Duplicate
 				alertTitle = @"Duplicate upload";
 				alertMessage = @"This double photo already exists.";
+                // TODO: Reload definitions of which photos are uploaded    
 				break;}												
 			case 401:	// Not Authorized
 			case 403:{
 				alertTitle = @"Login Failure";
 				alertMessage = @"Your username or password is no longer valid. Please login again from the settings screen.";
-				break;}												
+				break;}
+            default:
+			case 500:{	// Server error
+				alertTitle = @"Server Error";
+				alertMessage = @"There was an error processing your upload.";
+                NSLog(@"Response was: %@", responseString);
+				break;}		                
 		}
-		UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: alertTitle
-																 message: alertMessage
-																delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
-		[completeAlert show];
+        if(showAlert) {
+            UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: alertTitle
+                                                                     message: alertMessage
+                                                                    delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
+            [completeAlert show];
+                
+        }
+        
+        [[[SyncManager sharedSyncManager] pendingUploads]
+            removeObject:[request.userInfo objectForKey:@"prefix"]];
+        [[SyncManager sharedSyncManager] reloadPhotoListWithCompletionBlock:nil];
 	}
 	
 	// Release the queue if this was the last request
@@ -456,17 +417,22 @@
 }
 
 - (void)requestFailed:(ASIHTTPRequest *)request {
-	UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Server Error"
-															 message: @"There was an error processing your upload. Please try again later."
-															delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
-	[completeAlert show];
-	NSLog(@"Request failed at: %@", [[request userInfo] objectForKey:@"id"]);
-	
-	[self.uploadQueue cancelAllOperations];
-	
-	self.uploadQueue = nil;
-	[[UIApplication sharedApplication] endBackgroundTask:backgroundTask];
-	backgroundTask = UIBackgroundTaskInvalid;		  
+    if(request.retryCount == request.numberOfTimesToRetryOnTimeout) {
+        UIAlertView *completeAlert = [[[UIAlertView alloc] initWithTitle: @"Server Error"
+                                                                 message: @"There was an error processing your upload. Please try again later."
+                                                                delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
+        [completeAlert show];
+        NSLog(@"Request failed at: %@", [[request userInfo] objectForKey:@"id"]);
+        
+        [self.uploadQueue cancelAllOperations];
+        
+        self.uploadQueue = nil;
+        [[UIApplication sharedApplication] endBackgroundTask:backgroundTask];
+        backgroundTask = UIBackgroundTaskInvalid;	
+        
+        [[[SyncManager sharedSyncManager] pendingUploads]
+         removeObject:[request.userInfo objectForKey:@"prefix"]];
+    }
 }
 - (void)uploadComplete:(ASIHTTPRequest *)request {
 	// Release the queue if this was the last request

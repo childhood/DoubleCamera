@@ -30,8 +30,14 @@
 	[defaults setObject:[NSNumber numberWithInt:0] forKey:@"user_id"];
 	[defaults setObject:@"" forKey:@"username"];
 	[defaults setObject:@"" forKey:@"password"];
-	
+	[defaults setObject:[NSDictionary dictionary] forKey:@"photolist"];
+    [defaults setObject:@"" forKey:@"web-base"];
+
+    [defaults setObject:@"YES" forKey:@"save-diptych"];
+    
 	[userDefaults registerDefaults:defaults];	
+    
+    //[userDefaults setObject:[NSDictionary dictionary] forKey:@"photolist"];
 	
 	//[[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"username"];
 	

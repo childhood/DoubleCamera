@@ -11,6 +11,8 @@
 #import "DoublePhoto.h"
 #import "UploadViewController.h"
 #import "LoginViewController.h"
+#import "Reachability.h"
+#import "Utilities.h"
 
 @implementation ReviewPhotoViewController
 
@@ -245,11 +247,20 @@
 					 completion: ^(BOOL b){
 						 [self.processingView removeFromSuperview];
 						 //[self launchCamera];
-						 
-						 UploadViewController *uploadView = [[[UploadViewController alloc] init] autorelease];
-						 uploadView.toUpload = self.capturedDoublePhoto;
-						 [self.navigationController pushViewController:uploadView animated:YES];
- 						 self.capturedDoublePhoto = nil;
+
+                         if([Reachability connectedToTheNet]) {
+                             UploadViewController *uploadView = [[[UploadViewController alloc] init] autorelease];
+                             uploadView.toUpload = self.capturedDoublePhoto;
+                             [self.navigationController pushViewController:uploadView animated:YES];
+
+       						 self.capturedDoublePhoto = nil;
+                         }
+                         else {
+                             [self launchCamera];
+                             
+                             [self.capturedImages removeAllObjects];
+                             [self.capturedDoublePhoto release];                             
+                         }
 					 }];
 }
 

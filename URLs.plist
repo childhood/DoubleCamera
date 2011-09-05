@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>login</key>
+	<string></string>
+	<key>user-info</key>
+	<string>http://www.dblc.am/mobile/userInfo.php</string>
+	<key>register-user</key>
+	<string>http://www.dblc.am/mobile/register</string>
+	<key>new-photo</key>
+	<string>http://www.dblc.am/mobile/newphoto.php</string>
+	<key>photo-list</key>
+	<string>http://www.dblc.am/mobile/photolist.php</string>
+	<key>s3-base</key>
+	<string>http://doublecamera.s3.amazonaws.com/photos/</string>
+	<key>s3-bucket</key>
+	<string>doublecamera</string>
+	<key>safari-view</key>
+	<string>http://www.dblc.am/%@</string>
+</dict>
+</plist>

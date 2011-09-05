@@ -16,6 +16,8 @@
 #import "Utilities.h"
 #import "UploadViewController.h"
 
+#import "SyncManager.h"
+
 @implementation OrganizerViewController
 
 @synthesize backScrollView, frontScrollView, selectedImages, checkImage, baseImageDirectory, mainToolbar, doublePhotos, orderedPhotoKeys;
@@ -28,12 +30,20 @@
     if (self) {
 		self.baseImageDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
 		self.doublePhotos = [NSMutableDictionary dictionary];
+        
+        [self resetNavbar];
     }
     return self;
 }
 
-
 - (void)viewWillAppear:(BOOL)animated {
+    if([(NSDictionary *)[[NSUserDefaults standardUserDefaults] objectForKey:@"photolist"] count] == 0) {
+        [[SyncManager sharedSyncManager] reloadPhotoListWithCompletionBlock:^ {            
+            NSLog(@"Done reloading photolist");
+            [self reloadThumbnails];
+        }];
+    }
+    
 	[self clearSelection];
 	mode = OrganizerModeSelectOneToView;
 	[self reloadThumbnails];
@@ -42,7 +52,9 @@
 	[[UIApplication sharedApplication] setStatusBarHidden:NO];
 	[[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleBlackTranslucent];
 	self.navigationController.navigationBar.barStyle = UIBarStyleBlackTranslucent;
-	
+
+    [self resetNavbar];
+    
 	self.view.frame = [[UIScreen mainScreen] applicationFrame];
 	[super viewWillAppear:animated];
 }
@@ -67,7 +79,7 @@
 	self.selectedImages = [NSMutableArray array];
 	
 	// Load icons
-	self.checkImage = [UIImage imageNamed:@"check.png"];
+	self.checkImage = [UIImage imageNamed:@"upload-icon.png"];
 	if(self.checkImage == nil) NSLog(@"Could not load check image file.");
 	
 	[self reloadThumbnails];
@@ -114,11 +126,11 @@
 	// Sort the keys array
 	[self.orderedPhotoKeys sortUsingComparator: ^(id obj1, id obj2) {
 		
-		if ([obj1 integerValue] > [obj2 integerValue]) {
+		if ([obj1 integerValue] < [obj2 integerValue]) {
 			return (NSComparisonResult)NSOrderedDescending;
 		}
 		
-		if ([obj1 integerValue] < [obj2 integerValue]) {
+		if ([obj1 integerValue] > [obj2 integerValue]) {
 			return (NSComparisonResult)NSOrderedAscending;
 		}
 		return (NSComparisonResult)NSOrderedSame;
@@ -139,6 +151,9 @@
 	[self reloadKeys];
 	
 	// Make buttons for each image
+    int buttonSize = 74;
+    int buttonSpacing = 78;
+    int leftMargin = 6;
 	int i=0;
 	int perRow = 4;
 	int bufferTop = 64;
@@ -146,17 +161,21 @@
 	
 	if(UIInterfaceOrientationIsPortrait(self.interfaceOrientation)) {
 		perRow = 4;
-		bufferTop = 64;
+		bufferTop = 68;
 	}
 	else {
 		perRow = 6;
-		bufferTop = 54;
+		bufferTop = 58;
 	}
 	
 	for(NSString* key in orderedPhotoKeys) {
+        //if([[SyncManager sharedSyncManager] isPhotoOnline:key]) { }
+        
 		DoublePhoto *doublePhoto = (DoublePhoto *)[doublePhotos objectForKey:key];
 		if(doublePhoto.frontThumbnailImage != nil && doublePhoto.backThumbnailImage != nil) {
-			CGRect buttonFrame = CGRectMake((i%perRow) * 78 + 6, (int)(i/perRow)*78 + 4 + bufferTop, 74, 74);
+			CGRect buttonFrame = CGRectMake((i%perRow) * buttonSpacing + leftMargin,
+                                            (int)(i/perRow) * buttonSpacing + bufferTop,
+                                            buttonSize, buttonSize);
 
 			UIButton *frontButton = [UIButton buttonWithType:UIButtonTypeCustom];
 			frontButton.frame = buttonFrame;
@@ -179,8 +198,10 @@
 	}
 	
 	// Set the scroll view sizes
-	[frontScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/perRow + 2) * 78 + 6 + bufferBottom)];
-	[backScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/perRow + 2) * 78 + 6 + bufferBottom)];
+	[frontScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/perRow + 2) *
+                                               buttonSpacing + 6 + bufferBottom)];
+	[backScrollView setContentSize:CGSizeMake(320, (int)(doublePhotos.count/perRow + 2) *
+                                              buttonSpacing + 6 + bufferBottom)];
 }
 
 
@@ -212,7 +233,7 @@
 #pragma mark IBActions
 
 - (IBAction)showActionSheet {
-	UIActionSheet *organizerActionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Delete Photos" otherButtonTitles:@"Upload Photos",@"Change User ID",nil];
+	UIActionSheet *organizerActionSheet = [[UIActionSheet alloc] initWithTitle:nil delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:@"Delete Photos" otherButtonTitles:@"Upload Photos",@"Change User",@"View in Safari",nil];
 	organizerActionSheet.actionSheetStyle = UIActionSheetStyleBlackTranslucent;
 	[organizerActionSheet showInView:self.view];
 	[organizerActionSheet release];
@@ -235,8 +256,11 @@
 		}
 		case OrganizerModeSelectToDelete:
 		case OrganizerModeSelectToPrint:
+            [self toggleSelection:button];
+            break;
 		case OrganizerModeSelectToUpload:
-			[self toggleSelection:button];
+            if(![[SyncManager sharedSyncManager] isPhotoOnline:button.currentTitle])
+                [self toggleSelection:button];
 			break;			
 		default:
 			break;
@@ -273,11 +297,47 @@
 	}
 }
 
+#pragma -
+#pragma Icon management
+
+- (void)addUploadedIcons {
+	void (^addIcons)(UIScrollView *) = ^(UIScrollView *scrollView) {
+		UIButton *_button;
+		for(int i=0; i<scrollView.subviews.count; i++) {
+			if([[scrollView.subviews objectAtIndex:i] isKindOfClass:[UIButton class]]) {
+				_button = (UIButton *)[scrollView.subviews objectAtIndex:i];
+                if([[SyncManager sharedSyncManager] isPhotoOnline:_button.currentTitle]) {
+                    UIImage *uploadedImage = [UIImage imageNamed:@"uploaded-icon.png"];
+                    
+                    NSInteger checkSize = [uploadedImage size].width;
+                    static const int checkBuffer = 4;
+                    CGRect checkFrame = CGRectMake(_button.frame.size.width-checkSize-checkBuffer,
+                                                   _button.frame.size.height-checkSize-checkBuffer,
+                                                   checkSize, checkSize);
+                    UIImageView *checkView = [[UIImageView alloc] initWithImage:uploadedImage];
+                    checkView.tag = CHECK_ICON_TAG;
+                    checkView.frame = checkFrame;
+                    [_button addSubview:checkView];
+                    [checkView release];
+                }
+			}
+		}
+	};
+	addIcons(frontScrollView);
+	addIcons(backScrollView);    
+}
 - (void)addCheck:(UIButton *)button {
 	button.selected = YES;
-	NSInteger checkSize = [checkImage size].width;
-	CGRect checkFrame = CGRectMake(button.frame.size.width-checkSize,button.frame.size.height-checkSize, checkSize, checkSize);
-	UIImageView *checkView = [[UIImageView alloc] initWithImage:checkImage];
+    UIImage *checkImg = mode == OrganizerModeSelectToDelete ?
+                                    [UIImage imageNamed:@"red-check.png"] : 
+                                    [UIImage imageNamed:@"blue-check.png"];
+    
+	NSInteger checkSize = [checkImg size].width;
+    static const int checkBuffer = 4;
+	CGRect checkFrame = CGRectMake(button.frame.size.width-checkSize-checkBuffer,
+                                   button.frame.size.height-checkSize-checkBuffer,
+                                   checkSize, checkSize);
+	UIImageView *checkView = [[UIImageView alloc] initWithImage:checkImg];
 	checkView.frame = checkFrame;
 	checkView.tag = CHECK_ICON_TAG;
 	[button addSubview:checkView];
@@ -347,9 +407,6 @@
 	for(NSString *filePrefix in selectedImages) {
 		NSInteger del = [((DoublePhoto*)[self.doublePhotos objectForKey:filePrefix]) deleteFromDisk];
 		NSLog(@"Deleted %i files.", del);
-		//NSLog(@"Deleting %@", [baseImageDirectory stringByAppendingFormat:@"/%@_front.jpg",filePrefix]);
-		//[[NSFileManager defaultManager] removeItemAtPath:[baseImageDirectory stringByAppendingFormat:@"/%@_front.jpg",filePrefix] error:nil];
-		//[[NSFileManager defaultManager] removeItemAtPath:[baseImageDirectory stringByAppendingFormat:@"/%@_back.jpg",filePrefix] error:nil];
 	}
 }
 
@@ -373,18 +430,37 @@
 		[self.selectedImages removeAllObjects];	// Clear the selected images array
 		switch (buttonIndex) {
 			case 0:
+                // Delete
 				[self updateMode:OrganizerModeSelectToDelete];
 				break;
 			case 1:
+                // Upload
 				[self updateMode:OrganizerModeSelectToUpload];
 				break;
 			case 2: {
-				//[self updateMode:OrganizerModeSelectToPrint];
+                // Change user
 				LoginViewController *loginView = [[[LoginViewController alloc] initWithNibName:@"LoginView" bundle:nil] autorelease];
+                loginView.title = @"Sign In";
+                loginView.returnController = nil;
 				[self.navigationController pushViewController:loginView animated:YES];
 				break;
 			}
-			default: case 3:
+            case 3: {
+                // View in Safari
+                NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:
+                                                   [[SyncManager sharedSyncManager] URLStringForScript:@"safari-view"],
+                                                   [[NSUserDefaults standardUserDefaults] stringForKey:@"username"]]];
+                
+                [[UIApplication sharedApplication] openURL:url];
+                break;
+            }
+            /*
+            case 4: {
+                // View print queue
+                break;
+            }
+            */
+			default: case 4:
 				[self updateMode:OrganizerModeSelectOneToView];
 				break;
 		}
@@ -402,13 +478,15 @@
 				self.navigationItem.leftBarButtonItem = nil;
 				self.navigationItem.rightBarButtonItem = nil;
 				[self clearSelection];
-				[self showToolbar];
+                [self resetNavbar];
+				//[self showToolbar];
 				break;
 			case OrganizerModeSelectToUpload: {
 				UIBarButtonItem *leftBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Cancel" style:UIBarButtonItemStylePlain target:self action:@selector(resetToolbars)];
 				self.navigationItem.leftBarButtonItem = leftBarButton;
 				UIBarButtonItem *rightBarButton = [[UIBarButtonItem alloc] initWithTitle:@"Upload" style:UIBarButtonItemStyleDone target:self action:@selector(doneWithSelection)];
-				self.navigationItem.rightBarButtonItem = rightBarButton;				
+				self.navigationItem.rightBarButtonItem = rightBarButton;		
+                [self addUploadedIcons];
 				[self hideToolbar];
 				break;
 			}
@@ -438,7 +516,13 @@
 	[self updateMode:OrganizerModeSelectOneToView];
 }
 
+- (void)resetNavbar {
+    self.title = @"Double Album";
+    UIBarButtonItem *rightBarButton = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(showActionSheet)] autorelease];
+    self.navigationItem.rightBarButtonItem = rightBarButton;
+}
 - (void)hideToolbar {
+    /*
 	if(mainToolbar.hidden == NO) {
 		[UIView animateWithDuration:0.4 animations:^{
 			CGRect frame = mainToolbar.frame;
@@ -448,9 +532,11 @@
 			mainToolbar.hidden = YES;
 		}];
 	}
+    */
 }
 
 - (void)showToolbar {
+    /*
 	if(mainToolbar.hidden == YES) {
 		mainToolbar.hidden = NO;
 		[UIView animateWithDuration:0.4 animations:^{
@@ -459,6 +545,7 @@
 			mainToolbar.frame = frame;
 		}];
 	}
+    */
 }
 
 - (void)updateNavbarTitle {

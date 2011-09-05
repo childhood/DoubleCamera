@@ -64,6 +64,7 @@ typedef enum {
 - (void)resetToolbars;
 - (void)showToolbar;
 - (void)hideToolbar;
+- (void)resetNavbar;
 - (void)updateMode:(OrganizerMode)newMode;
 - (void)doneWithSelection;
 - (void)updateNavbarTitle;
@@ -72,6 +73,7 @@ typedef enum {
 - (void)requestFailed:(ASIHTTPRequest *)request;
 
 - (UIButton *)flipsideButton:(UIButton *)button;
+- (void)addUploadedIcons;
 - (void)addCheck:(UIButton *)button;
 - (void)removeCheck:(UIButton *)button;
 - (BOOL)toggleSelection:(UIButton *)button;

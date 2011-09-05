@@ -10,11 +10,14 @@
 #import "ASIFormDataRequest.h"
 #import "JSON.h"
 #import "Utilities.h"
+#import "SyncManager.h"
 
 @implementation LoginViewController
 
 @synthesize usernameField, passwordField, activityIndicator;
+@synthesize registerView, registerWebView;
 @synthesize returnController;
+
 
 // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
 /*
@@ -52,8 +55,8 @@
 */
 
 - (IBAction) signIn {
-	NSURL *url = [NSURL URLWithString:@"http://benjaminlotan.com/doublecamera/userInfo.php"];
-	__block ASIFormDataRequest *authenticateRequest= [ASIFormDataRequest requestWithURL:url];
+    NSURL *url =   [[SyncManager sharedSyncManager] URLForScript:@"user-info"];
+	__block ASIFormDataRequest *authenticateRequest = [ASIFormDataRequest requestWithURL:url];
 	[authenticateRequest addPostValue:self.usernameField.text forKey:@"username"];
 	[authenticateRequest addPostValue:[Utilities MD5:self.passwordField.text] forKey:@"password"];
 	
@@ -70,16 +73,19 @@
 			[[NSUserDefaults standardUserDefaults] setObject:self.passwordField.text forKey:@"password"];
 			
 			NSLog(@"Stored user ID: %i", [[NSUserDefaults standardUserDefaults] integerForKey:@"user_id"]);
-			//[[self retain] autorelease];
-			
+            
+            [[SyncManager sharedSyncManager] reloadPhotoListWithCompletionBlock:nil];        
+
 			// Pop this view, and push the return destination
-			
-			//[self.navigationController pushViewController:self.returnController animated:YES];
-			
-			NSMutableArray *controllers = [[self.navigationController.viewControllers mutableCopy] autorelease];
-			[controllers removeLastObject];
-			[controllers addObject:self.returnController];
-			[self.navigationController setViewControllers:controllers animated:YES];
+            if(self.returnController != nil) {
+                NSMutableArray *controllers = [[self.navigationController.viewControllers mutableCopy] autorelease];
+                [controllers removeLastObject];
+                [controllers addObject:self.returnController];
+                [self.navigationController setViewControllers:controllers animated:YES];
+            }
+            else {
+                [self.navigationController popViewControllerAnimated:YES];
+            }
 		}
 		else {
 			// Unsuccessful
@@ -90,6 +96,7 @@
 			UIAlertView *errorAlert = [[[UIAlertView alloc] initWithTitle: @"Could Not Log In"
 																	 message: @"Sorry, try again!"
 																	delegate: self cancelButtonTitle: @"Ok" otherButtonTitles: nil] autorelease];
+            NSLog(@"Response: %@", responseString);
 			[errorAlert show];			
 			
 		}
@@ -97,6 +104,48 @@
 	
 	[authenticateRequest startAsynchronous];
 	[self.activityIndicator startAnimating];
+}
+
+- (IBAction)launchRegisterView {
+	NSURLRequest *requestObj = [NSURLRequest requestWithURL:[[SyncManager sharedSyncManager] URLForScript:@"register-user"]];
+	[registerWebView loadRequest:requestObj];
+    
+	[registerView setAlpha:0];
+	[registerView setHidden:NO];
+	[UIView animateWithDuration:0.2 animations:^{
+		[registerView setAlpha:1];
+	} completion:^(BOOL b){}];
+}
+- (IBAction)dismissRegisterView {
+    [UIView animateWithDuration:0.2 animations:^{
+        [registerView setAlpha:0];
+    } completion:^(BOOL b) { registerView.hidden = YES; }];
+    NSString *username = [registerWebView stringByEvaluatingJavaScriptFromString:@"document.getElementById('username').attributes.getNamedItem('value').value"];
+    NSString *password = [registerWebView stringByEvaluatingJavaScriptFromString:@"document.getElementById('password').attributes.getNamedItem('value').value"];
+    NSString *user_id = [registerWebView stringByEvaluatingJavaScriptFromString:@"document.getElementById('id').attributes.getNamedItem('value').value"];
+    NSLog(@"Username: %@ / Password: %@ / ID: %@", username, password, user_id); 
+    
+    if(![username isEqualToString:@""] && ![password isEqualToString:@""]) {
+        [[NSUserDefaults standardUserDefaults] setObject:user_id forKey:@"user_id"];
+        [[NSUserDefaults standardUserDefaults] setObject:username forKey:@"username"];
+        [[NSUserDefaults standardUserDefaults] setObject:password forKey:@"password"];
+        
+        NSLog(@"Stored user ID: %i", [[NSUserDefaults standardUserDefaults] integerForKey:@"user_id"]);
+        
+        [[SyncManager sharedSyncManager] reloadPhotoListWithCompletionBlock:nil];        
+        
+        // Pop this view, and push the return destination
+        
+        if(self.returnController != nil) {
+            NSMutableArray *controllers = [[self.navigationController.viewControllers mutableCopy] autorelease];
+            [controllers removeLastObject];
+            [controllers addObject:self.returnController];
+            [self.navigationController setViewControllers:controllers animated:YES];
+        }
+        else {
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }
 }
 
 - (void)didReceiveMemoryWarning {
